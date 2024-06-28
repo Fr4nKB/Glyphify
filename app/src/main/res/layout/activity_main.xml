@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/custom_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/bit_dotted"
+            android:layout_gravity="center_vertical"
+            android:text="GLIPHIFY"
+            android:textSize="25sp" />
+
+        <LinearLayout
+            android:id="@+id/toolbar_btns_wrapper"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="end">
+
+            <ImageButton
+                android:id="@+id/btn_applyRingtone"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:src="@drawable/ic_apply"
+                android:background="@drawable/circle"
+                android:contentDescription="app"
+                app:tint="@android:color/white" />
+
+            <ImageButton
+                android:id="@+id/btn_shareRingtone"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:src="@drawable/ic_share"
+                android:background="@drawable/circle"
+                android:contentDescription="app"
+                app:tint="@android:color/white" />
+
+            <ImageButton
+                android:id="@+id/btn_deleteRingtone"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:src="@drawable/ic_bin"
+                android:background="@drawable/circle"
+                android:contentDescription="app"
+                app:tint="@android:color/white" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"/>
+
+    <fragment
+        android:id="@+id/nav_host_fragment_activity_main"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/nav_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:navGraph="@navigation/mobile_navigation" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

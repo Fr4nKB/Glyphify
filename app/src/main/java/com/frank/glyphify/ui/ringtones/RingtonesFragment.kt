@@ -1,0 +1,214 @@
+package com.frank.glyphify.ui.ringtones
+
+import android.Manifest
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.graphics.Color
+import android.media.RingtoneManager
+import android.net.Uri
+import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.provider.Settings
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.frank.glyphify.R
+import com.frank.glyphify.databinding.FragmentRingtonesBinding
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+
+
+class RingtonesFragment : Fragment() {
+
+    private var _binding: FragmentRingtonesBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentRingtonesBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+
+        // Load the files
+        val directory = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_RINGTONES),
+            "Compositions")
+        val files = directory.listFiles()
+
+        // Create an adapter for the RecyclerView
+        val adapter = FilesAdapter(files)
+
+        // Set the adapter to the RecyclerView
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        return root
+    }
+
+    inner class FilesAdapter(private var files: Array<File>) : RecyclerView.Adapter<FilesAdapter.ViewHolder>() {
+
+        var lastKnownPos = -1  // keep track of the last selected item
+        init {
+            // Filter out only .ogg files
+            files = files.filter { it.extension == "ogg" }.toTypedArray()
+        }
+
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val textView: TextView = view.findViewById(R.id.textView)
+            val toolbarBtnsWrapper: LinearLayout = requireActivity().findViewById(R.id.toolbar_btns_wrapper)
+            val btnApplyRingtone: ImageButton = requireActivity().findViewById(R.id.btn_applyRingtone)
+            val btnShareRingtone: ImageButton = requireActivity().findViewById(R.id.btn_shareRingtone)
+            val btnDeleteRingtone: ImageButton = requireActivity().findViewById(R.id.btn_deleteRingtone)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_ringtone, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val file = files[position]
+            holder.textView.text = file.nameWithoutExtension
+
+            holder.itemView.setOnClickListener() {
+                val previousPos = lastKnownPos
+                if (lastKnownPos == position) {     // the same item has been tapped
+                    lastKnownPos = -1
+                    holder.toolbarBtnsWrapper.visibility = View.GONE
+                }
+                else {      // a different item was tapped
+                    lastKnownPos = position
+                }
+
+                // If an item was previously selected, refresh it to remove the highlight and hide the buttons
+                if (previousPos != -1) {
+                    notifyItemChanged(previousPos)
+                }
+
+                // If an item is currently selected, refresh it to show the highlight and display the buttons
+                if (lastKnownPos != -1) {
+                    notifyItemChanged(lastKnownPos)
+                }
+            }
+
+            // Set the background color and visibility of the toolbar buttons based on whether the current item is selected
+            if (position == lastKnownPos) {
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.red))
+                holder.toolbarBtnsWrapper.visibility = View.VISIBLE
+            }
+            else {
+                holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+            }
+
+            // map each button to a function on the selected file
+            holder.btnApplyRingtone.setOnClickListener {
+                applyRingtone(files[lastKnownPos])
+                // unselect item and refresh RecyclerView
+                lastKnownPos = -1
+                holder.toolbarBtnsWrapper.visibility = View.GONE
+                notifyDataSetChanged()
+            }
+
+            holder.btnShareRingtone.setOnClickListener {
+                shareRingtone(files[lastKnownPos])
+                lastKnownPos = -1
+                holder.toolbarBtnsWrapper.visibility = View.GONE
+                notifyDataSetChanged()
+            }
+
+            holder.btnDeleteRingtone.setOnClickListener {
+                if (files[lastKnownPos].delete()) {
+                    files = files.filterIndexed { index, _ -> index != lastKnownPos }.toTypedArray()
+                    lastKnownPos = -1
+                    holder.toolbarBtnsWrapper.visibility = View.GONE
+                    notifyDataSetChanged()
+                }
+            }
+        }
+
+        override fun getItemCount() = files.size
+    }
+
+    private fun applyRingtone(file: File) {
+        if (!Settings.System.canWrite(requireContext())) {
+            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+            startActivity(intent)
+        }
+        else {
+            try {
+                val values = ContentValues()
+                val toastMSG = "Ringtone is set"
+                val ringtoneType = RingtoneManager.TYPE_RINGTONE
+
+                val sharedPref: SharedPreferences = requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
+                val uri = Uri.parse(sharedPref.getString(file.nameWithoutExtension, null))
+
+                requireContext().contentResolver.openOutputStream(uri!!).use { os ->
+                    val size = file.length().toInt()
+                    val bytes = ByteArray(size)
+                    try {
+                        val buf =
+                            BufferedInputStream(FileInputStream(file))
+                        buf.read(bytes, 0, bytes.size)
+                        buf.close()
+                        os!!.write(bytes)
+                        os.close()
+                        os.flush()
+                    }
+                    catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                RingtoneManager.setActualDefaultRingtoneUri(
+                    requireContext(), ringtoneType,
+                    uri
+                )
+
+                Toast.makeText(requireContext(), toastMSG, Toast.LENGTH_SHORT).show()
+            }
+            catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun shareRingtone(file: File) {
+
+        val uri: Uri = FileProvider.getUriForFile(
+            requireContext(),
+            "it.frank.glyphify.provider", // replace with your FileProvider authority
+            file
+        )
+
+        val shareIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, uri)
+            type = "audio/ogg"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        startActivity(Intent.createChooser(shareIntent, "Share file via"))
+    }
+
+
+}

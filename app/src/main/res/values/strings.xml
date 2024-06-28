@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Glyphify</string>
+    <string name="title_home">Glyphifier</string>
+    <string name="title_ringtones">Ringtones</string>
+    <string name="btn_file_selection">Select a file</string>
+    <string name="btn_desc_file_selection">Select a file</string>
+    <string name="title_alert_output_name">Ringtone name</string>
+    <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
+    <string name="posbtn_alert_output_name">OK</string>
+    <string name="negbtn_alert_output_name">Abort</string>
+    <string name="btn_apply_ringtone">Apply as ringtone</string>
+    <string name="btn_share">Share</string>
+    <string name="btn_delete">Delete</string>
+</resources>
