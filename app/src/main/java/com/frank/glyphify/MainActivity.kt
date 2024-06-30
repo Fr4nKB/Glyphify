@@ -1,22 +1,22 @@
 package com.frank.glyphify
 
-import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.frank.glyphify.databinding.ActivityMainBinding
-import android.os.Build
-import android.util.Log
+import com.frank.glyphify.ui.dialogs.Dialog
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlin.random.Random
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
             this.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPref.edit()
 
-        if (manufacturer.equals("Nothing", ignoreCase = true)) {
+        if(manufacturer.equals("Nothing", ignoreCase = true)) {
             if(model.equals("A063")) {
                 editor.putString("appVersion", "Spacewar Glyph Composer")
                 editor.apply()
@@ -42,6 +42,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         return "0"
+    }
+
+    private fun supportMe() {
+        Dialog.showDialog(
+            this,
+            R.layout.first_boot,
+            mapOf(
+                R.id.paypalBtn to {
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL")))
+                                  },
+                R.id.githubBtn to {
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/Fr4nKB/Glyphify")))
+                                  },
+                R.id.negativeButton to {}
+            ),
+            isCancelable = false,
+            delayEnableButtonId = R.id.negativeButton,
+            delayMillis = 10000
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +80,21 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         setComposerAppVersion()
-    }
 
+        val sharedPref: SharedPreferences =
+            this.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        val isFirstBoot = sharedPref.getBoolean("firstboot", true)
+        val randomNumber = Random.nextInt(1, 11)
+
+        if (isFirstBoot || randomNumber == 1) {
+            supportMe()
+            if (isFirstBoot) {
+                val editor: SharedPreferences.Editor = sharedPref.edit()
+                editor.putBoolean("firstboot", false)
+                editor.apply()
+            }
+        }
+
+    }
 }

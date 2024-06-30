@@ -13,4 +13,8 @@
     <string name="alert_settings_perm_msg">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Abort</string>
+
+    <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
+    <string name="support_paypal">Buy me a coffee</string>
+    <string name="support_github">Star my repo</string>
 </resources>

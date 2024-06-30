@@ -14,4 +14,8 @@
     <string name="alert_settings_perm_msg">Questa app ha bisogno di cambiare le impostazioni di sistema per applicare la suoneria. Vuoi concedere il permesso?</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Annulla</string>
+
+    <string name="support_me">Benvenuto! Questa è un\'app gratis e senza pubblicità fatta da uno studente. Se trovi valore nel mio lavoro e vorresti dimostrare il tuo apprezzamento, valuta la possibilità di fare una donazione o di assegnare una stella alla mia repository GitHub. Qualsiasi supporto è apprezzato, grazie per aver letto!</string>
+    <string name="support_paypal">Comprami un caffè</string>
+    <string name="support_github">Repository GitHub</string>
 </resources>

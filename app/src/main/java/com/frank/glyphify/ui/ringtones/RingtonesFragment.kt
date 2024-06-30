@@ -1,33 +1,21 @@
 package com.frank.glyphify.ui.ringtones
 
-import android.Manifest
-import android.app.AlertDialog
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.provider.Settings
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -35,10 +23,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.frank.glyphify.R
 import com.frank.glyphify.databinding.FragmentRingtonesBinding
+import com.frank.glyphify.ui.dialogs.Dialog
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileOutputStream
 
 
 class RingtonesFragment : Fragment() {
@@ -47,30 +35,14 @@ class RingtonesFragment : Fragment() {
     private val binding get() = _binding!!
 
     private fun showPermissionDialog(context: Context) {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.ask_permission, null)
-        val positiveButton = dialogView.findViewById<Button>(R.id.positiveButton)
-        val negativeButton = dialogView.findViewById<Button>(R.id.negativeButton)
-
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
-
-        positiveButton.setOnClickListener {
-            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
-            startActivity(intent)
-            dialog.dismiss()
-        }
-
-        negativeButton.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        // ignore theme style and apply custom style for these buttons
-        positiveButton.backgroundTintList = null
-        negativeButton.backgroundTintList = null
-
-        dialog.show()
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        Dialog.showDialog(
+            context,
+            R.layout.ask_permission,
+            mapOf(
+                R.id.positiveButton to { startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)) },
+                R.id.negativeButton to {}
+            )
+        )
     }
 
     override fun onCreateView(
