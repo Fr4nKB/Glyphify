@@ -4,13 +4,11 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_glyphifier"
-        android:title="@string/title_home"
-        android:fontFamily="@font/dot_gothic" />
+        android:title="@string/title_home" />
 
     <item
         android:id="@+id/navigation_ringtones"
         android:icon="@drawable/ic_ringtones_lib"
-        android:title="@string/title_ringtones"
-        android:fontFamily="@font/dot_gothic" />
+        android:title="@string/title_ringtones" />
 
 </menu>

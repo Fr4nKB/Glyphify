@@ -9,14 +9,12 @@
         android:id="@+id/navigation_home"
         android:name="com.frank.glyphify.ui.home.HomeFragment"
         android:label="@string/title_home"
-        android:fontFamily="@font/dot_gothic"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_ringtones"
         android:name="com.frank.glyphify.ui.ringtones.RingtonesFragment"
         android:label="@string/title_ringtones"
-        android:fontFamily="@font/dot_gothic"
         tools:layout="@layout/fragment_ringtones" />
 
 </navigation>

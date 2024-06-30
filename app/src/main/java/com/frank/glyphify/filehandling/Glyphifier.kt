@@ -37,16 +37,18 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
                 "-1,-2,-4,c-2,-4,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,-1,-2,s-0,-1,-2,-3," +
                 "-4,c-2,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,s-0,-1,-2,-4," +
                 "c-2,-4,c-0,-1,-2,-3,-4"
+        const val ALBUM_NAME = "Glyphify"
     }
     private val path = context.filesDir.path
     private val uri = Uri.parse(inputData.getString("uri"))
+    private val outName = inputData.getString("outputName")
 
-    fun getFileExtension(uri: Uri, contentResolver: ContentResolver): String {
+    private fun getFileExtension(uri: Uri, contentResolver: ContentResolver): String {
         var extension: String? = null
 
-        // Check uri format to avoid null
+        // check uri format to avoid null
         if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
-            // The file is stored in the provider with a ContentProvider
+            // the file is stored in the provider with a ContentProvider
             val mime = MimeTypeMap.getSingleton()
             extension = mime.getExtensionFromMimeType(contentResolver.getType(uri))
         }
@@ -58,10 +60,17 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return extension ?: ""
     }
 
+    /**
+     * Retrieves details of a wav audio file using FFprobe
+     * @param filePath: path of the wav file
+     * @return duration and sample rate
+     * @throws RuntimeException if something went wrong
+     * */
     private fun getAudioDetails(filePath: String): Pair<Double, Int> {
         try {
             val mediaInformation = FFprobeKit.getMediaInformation(filePath).mediaInformation
             val duration = mediaInformation.duration.toDouble()
+
             val streams = mediaInformation.streams
             for (stream in streams) {
                 if (stream.type == "audio") {
@@ -69,12 +78,18 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
                     return Pair(duration, sampleRate)
                 }
             }
+
             return Pair(-1.0, -1)
         } catch (e: RuntimeException) {
             throw e
         }
     }
 
+    /**
+     * Compress data using zlib and then encodes it in base64
+     * @param data: the data to work on
+     * @return a string containing the base64 representation of the compresse data
+     * */
     fun compressAndEncode(data: String): String {
         val input = data.toByteArray(Charsets.UTF_8)
 
@@ -109,9 +124,8 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         // get file extension
         val ext = getFileExtension(uri, context.contentResolver)
         if (ext == "") throw RuntimeException("No such file")
-        else if (ext != "mp3" && ext != "wav") throw RuntimeException("Unsupported extension")
 
-        // load the file from uri
+        // create a local file from the uri so that ffmpeg can access it
         val tempFile = File(path, "temp.$ext")
         try {
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
@@ -125,21 +139,24 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
             throw RuntimeException("Failed to load file")
         }
 
-        //conversion from mp3 to wav using ffmpeg
-        if(ext == "mp3") {
-            val session = FFmpegKit.execute("-i $path/temp.mp3 $path/temp.wav -y")
+        // if the audio is not wav convert it using ffmpeg
+        if(ext != "wav") {
+            val session = FFmpegKit.execute("-i $path/temp.$ext $path/temp.wav -y")
             if(!ReturnCode.isSuccess(session.returnCode)){
-                Log.d("DEBUG", String.format("Command failed with state %s and rc %s.%s",
-                    session.getState(), session.getReturnCode(), session.getFailStackTrace()));
                 throw RuntimeException("Failed conversion")
             }
         }
         return true
     }
 
-    private fun getMonoAudioData(): ArrayList<Float> {
+    /**
+     * Transforms stereo data into mono channel data
+     * @param inputPath: path of the file for the stereo data
+     * @return the converted mono channel data
+     * */
+    private fun getMonoAudioData(inputPath: String): ArrayList<Float> {
         // prepare to read wav file
-        val wavFile = File("$path/temp.wav")
+        val wavFile = File(inputPath)
         val headerSize = 44     // common header size
         val audioDataBytes = ByteArray(wavFile.length().toInt() - headerSize)
 
@@ -147,13 +164,15 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         val inputStream = FileInputStream(wavFile)
         inputStream.skip(headerSize.toLong())
 
-        // read the audio data, convert from to stereo to mono by doing the average of channels
+        // read the audio data
         inputStream.read(audioDataBytes)
         inputStream.close()
 
+        // allows to read bytes as short(2 bytes) values
         val audioData = ByteBuffer.wrap(audioDataBytes).order(ByteOrder.LITTLE_ENDIAN)
             .asShortBuffer()
 
+        // convert from to stereo to mono by doing the average of channels
         val monoData = ArrayList<Float>(audioData.remaining() / 2)
         while (audioData.remaining() >= 2) {
             val left = audioData.get()
@@ -164,25 +183,29 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return monoData
     }
 
-    private fun deriveLEDData(results:  Array<FloatArray>): MutableList<Array<Int>> {
-
+    /**
+     * Derives the led data pattern based on the amplitudes
+     * @param amplitudes: array of amplitudes extracted from the audio
+     * @return an array containing the intensity of each led zone
+     * */
+    private fun deriveLEDData(amplitudes:  Array<FloatArray>): MutableList<Array<Int>> {
         // normalize the results to be between 0 and 4095
         // calculate the average amplitude for each region
-        val avgValuePerColumn = results[0].indices.map { i -> results.map { it[i] }.average() }
+        val avgValuePerColumn = amplitudes[0].indices.map { i -> amplitudes.map { it[i] }.average() }
         // normalize based on the average value
-        for (i in results.indices) {
-            for (j in results[i].indices) {
-                results[i][j] *= (MAX_LIGHT / (2 * avgValuePerColumn[j])).toFloat()
+        for (i in amplitudes.indices) {
+            for (j in amplitudes[i].indices) {
+                amplitudes[i][j] *= (MAX_LIGHT / (2 * avgValuePerColumn[j])).toFloat()
 
                 // clamping to not exceed the maximum value for light intensity
-                if (results[i][j] > MAX_LIGHT) {
-                    results[i][j] = (MAX_LIGHT - 1).toFloat()
+                if (amplitudes[i][j] > MAX_LIGHT) {
+                    amplitudes[i][j] = (MAX_LIGHT - 1).toFloat()
                 }
             }
         }
 
         // convert to integers
-        val resultsInt: Array<Array<Int>> = results.map { row ->
+        val resultsInt: Array<Array<Int>> = amplitudes.map { row ->
             row.map { it.toInt() }.toTypedArray()
         }.toTypedArray()
 
@@ -204,6 +227,11 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return lightData
     }
 
+    /**
+     * Build a Custom1 tag which shows the string 'GLIPHIFY' in the Composer app
+     * @param audioLen: the duration of the audio in seconds
+     * @return the compressed and encoded data for the preview
+     * */
     private fun buildCustom1Tag(audioLen: Double): String {
         val ledsPattern = LEDS_PATTERN.split(",")
 
@@ -235,9 +263,14 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return compressAndEncode(text)
     }
 
+    /**
+     * Build the Author tag which is responsible for the Glyph show
+     * @param sampleRate: sample rate of the audio to be set as ringtone
+     * @return the compressed and encoded data for the Glyph show
+     * */
     private fun buildAuthorTag(sampleRate: Int): String {
 
-        val monoData = getMonoAudioData()
+        val monoData = getMonoAudioData("$path/temp.wav")
 
         // define frequency regions according to sample rate
         val freqRegions = floatArrayOf(0f, sampleRate * 0.02f, sampleRate * 0.04f,
@@ -300,43 +333,90 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return compressAndEncode(csvString)
     }
 
-    private fun buildOgg(outputName: String, custom1Tag: String, authorTag: String) {
+    /**
+     * Given a name it checks if a file already exists with that name and if it does it modifies the
+     * name to be unique by adding a timestamp at the end of it
+     * @param originalName: name to check for duplicate
+     * @return the new unique name
+     * */
+    private fun getUniqueName(originalName: String): String {
+        var uniqueName = originalName
+
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf("$originalName.ogg")
+
+        val cursor = context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null)
+        if (cursor?.moveToFirst() == true) {
+            // File with the same name exists, append a unique identifier to the output name
+            uniqueName = "$originalName-${System.currentTimeMillis()}"
+        }
+        cursor?.close()
+
+        return uniqueName
+    }
+
+    /**
+     * Creates the final ringtone with all the data necessary for the Glyph show
+     * @param outputName: name of the ringtone
+     * @param custom1Tag: compressed and encoded data for the Glyph preview
+     * @param authorTag: compressed and encoded data for the Glyph show
+     * @return true if successful, false otherwise
+     * */
+    private fun buildOgg(outputName: String, custom1Tag: String, authorTag: String): Boolean {
+        val sharedPref: SharedPreferences =
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val appVers = sharedPref.getString("appVersion", "Spacewar Glyph Composer")
+
         try {
+            // convert from wav to ogg
             val session = FFmpegKit.execute("-i $path/temp.wav -c:a libopus " +
-                    "-metadata COMPOSER='Spacewar Glyph Composer' " +
-                    "-metadata TITLE='Glyphify' " +
-                    "-metadata ALBUM='Glyphify' " +
+                    "-metadata COMPOSER='$appVers' " +
+                    "-metadata TITLE='$ALBUM_NAME' " +
+                    "-metadata ALBUM='$ALBUM_NAME' " +
                     "-metadata CUSTOM1='$custom1Tag' " +
                     "-metadata AUTHOR='$authorTag' " +
-                    "$path/$outputName.ogg -y")
+                    "\"$path/$outputName.ogg\" -y")
 
-            if(ReturnCode.isSuccess(session.returnCode)) {
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, "$outputName.ogg")
-                    put(MediaStore.MediaColumns.MIME_TYPE, "audio/ogg")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RINGTONES + File.separator + "Compositions")
-                    put(MediaStore.Audio.AudioColumns.COMPOSER, "Spacewar Glyph Composer")
-                    put(MediaStore.Audio.AudioColumns.ALBUM, "Glyphify")
-                    put(MediaStore.Audio.AudioColumns.TITLE, "Glyphify")
-                    put(MediaStore.Audio.AudioColumns.IS_RINGTONE, true)
-                    put(MediaStore.Audio.AudioColumns.ARTIST, authorTag)
-                    // Add more metadata as needed
-                }
+            if(!ReturnCode.isSuccess(session.returnCode)) return false
 
-                val uri: Uri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
-                    ?: throw RuntimeException("Failed to build ogg")
+            // export ringtone to media store so that android OS can access it
+            // if name already in use the timestamp is appended at the end
+            val uniqueName = getUniqueName(outputName)
 
-                val sharedPref: SharedPreferences = context.getSharedPreferences("URIS", Context.MODE_PRIVATE)
-                val editor: SharedPreferences.Editor = sharedPref.edit()
-                editor.putString("$outputName", uri.toString())
-                editor.apply()
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "$uniqueName.ogg")
+                put(MediaStore.MediaColumns.MIME_TYPE, "audio/ogg")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RINGTONES + File.separator + "Compositions")
+                put(MediaStore.Audio.AudioColumns.COMPOSER, "Spacewar Glyph Composer")
+                put(MediaStore.Audio.AudioColumns.ALBUM, ALBUM_NAME)
+                put(MediaStore.Audio.AudioColumns.TITLE, ALBUM_NAME)
+                put(MediaStore.Audio.AudioColumns.IS_RINGTONE, true)
+                put(MediaStore.Audio.AudioColumns.ARTIST, authorTag)
+            }
 
-                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                    File("$path/$outputName.ogg").inputStream().use { inputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
+            val uri: Uri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw RuntimeException("Failed to build ogg")
+
+            // save uri in the shared preferences so it can be later access to set the ringtone
+            val sharedPref: SharedPreferences = context.getSharedPreferences("URIS", Context.MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = sharedPref.edit()
+            editor.putString(uniqueName, uri.toString())
+            editor.apply()
+
+            // copy data from local file to the exported one
+            val oggFile = File("$path/$outputName.ogg")
+
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                oggFile.inputStream().use { inputStream ->
+                    inputStream.copyTo(outputStream)
                 }
             }
+
+            // the ringtone has been exported, remove it from app's filesystem
+            oggFile.delete()
+            return true
         }
         catch (e: Exception) {
             throw (e)
@@ -373,8 +453,8 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         setProgressAsync(workDataOf("PROGRESS" to 80))
 
         // create ogg file which contains the Glyphified song
-        val outName = inputData.getString("outputName") ?: return Result.failure()
-        buildOgg(outName, custom1Tag, authorTag)
+        if(outName == null) return Result.failure()
+        if(!buildOgg(outName, custom1Tag, authorTag)) return Result.failure()
 
         setProgressAsync(workDataOf("PROGRESS" to 100))
         Thread.sleep(100)   // needed to show the progress bar at 100%

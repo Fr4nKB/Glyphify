@@ -18,10 +18,10 @@
             android:id="@+id/custom_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/bit_dotted"
+            android:fontFamily="@font/dot_matri"
             android:layout_gravity="center_vertical"
             android:text="GLIPHIFY"
-            android:textSize="25sp" />
+            android:textSize="35sp" />
 
         <LinearLayout
             android:id="@+id/toolbar_btns_wrapper"

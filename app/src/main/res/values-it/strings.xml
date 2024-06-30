@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Glyphify</string>
+    <string name="title_home">Glyphifier</string>
+    <string name="title_ringtones">Suonerie</string>
+    <string name="btn_file_selection">Seleziona un file</string>
+    <string name="btn_desc_file_selection">Seleziona un file</string>
+    <string name="msg_alert_output_name">INSERISCI UN NOME PER LA SUONERIA</string>
+    <string name="btn_apply_ringtone">Applica suoneria</string>
+    <string name="btn_share">Condividi</string>
+    <string name="btn_delete">Elimina</string>
+    <string name="toast_ringtone_applied">Suoneria di default applicata</string>
+    <string name="alert_settings_perm_title">Permesso richiesto</string>
+    <string name="alert_settings_perm_msg">Questa app ha bisogno di cambiare le impostazioni di sistema per applicare la suoneria. Vuoi concedere il permesso?</string>
+    <string name="alert_posbtn">OK</string>
+    <string name="alert_negbtn">Annulla</string>
+</resources>

@@ -1,6 +1,8 @@
 package com.frank.glyphify
 
 import android.Manifest
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -13,10 +15,34 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.frank.glyphify.databinding.ActivityMainBinding
+import android.os.Build
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private fun setComposerAppVersion(): String {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+
+        val sharedPref: SharedPreferences =
+            this.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+
+        if (manufacturer.equals("Nothing", ignoreCase = true)) {
+            if(model.equals("A063")) {
+                editor.putString("appVersion", "Spacewar Glyph Composer")
+                editor.apply()
+            }
+            else if(model.equals("A065")) {
+                editor.putString("appVersion", "Pong Glyph Composer")
+                editor.apply()
+            }
+        }
+
+        return "0"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,5 +57,8 @@ class MainActivity : AppCompatActivity() {
 
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         navView.setupWithNavController(navController)
+
+        setComposerAppVersion()
     }
+
 }

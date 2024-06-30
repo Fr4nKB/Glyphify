@@ -1,22 +1,28 @@
 package com.frank.glyphify.ui.ringtones
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -39,6 +45,33 @@ class RingtonesFragment : Fragment() {
 
     private var _binding: FragmentRingtonesBinding? = null
     private val binding get() = _binding!!
+
+    private fun showPermissionDialog(context: Context) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.ask_permission, null)
+        val positiveButton = dialogView.findViewById<Button>(R.id.positiveButton)
+        val negativeButton = dialogView.findViewById<Button>(R.id.negativeButton)
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        positiveButton.setOnClickListener {
+            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+            startActivity(intent)
+            dialog.dismiss()
+        }
+
+        negativeButton.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // ignore theme style and apply custom style for these buttons
+        positiveButton.backgroundTintList = null
+        negativeButton.backgroundTintList = null
+
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,7 +124,7 @@ class RingtonesFragment : Fragment() {
 
             holder.itemView.setOnClickListener() {
                 val previousPos = lastKnownPos
-                if (lastKnownPos == position) {     // the same item has been tapped
+                if(lastKnownPos == position) {     // the same item has been tapped
                     lastKnownPos = -1
                     holder.toolbarBtnsWrapper.visibility = View.GONE
                 }
@@ -100,18 +133,18 @@ class RingtonesFragment : Fragment() {
                 }
 
                 // If an item was previously selected, refresh it to remove the highlight and hide the buttons
-                if (previousPos != -1) {
+                if(previousPos != -1) {
                     notifyItemChanged(previousPos)
                 }
 
                 // If an item is currently selected, refresh it to show the highlight and display the buttons
-                if (lastKnownPos != -1) {
+                if(lastKnownPos != -1) {
                     notifyItemChanged(lastKnownPos)
                 }
             }
 
             // Set the background color and visibility of the toolbar buttons based on whether the current item is selected
-            if (position == lastKnownPos) {
+            if(position == lastKnownPos) {
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.red))
                 holder.toolbarBtnsWrapper.visibility = View.VISIBLE
             }
@@ -136,7 +169,8 @@ class RingtonesFragment : Fragment() {
             }
 
             holder.btnDeleteRingtone.setOnClickListener {
-                if (files[lastKnownPos].delete()) {
+                if(deleteRingtone(files[lastKnownPos])) {
+                    // update recycler view
                     files = files.filterIndexed { index, _ -> index != lastKnownPos }.toTypedArray()
                     lastKnownPos = -1
                     holder.toolbarBtnsWrapper.visibility = View.GONE
@@ -149,17 +183,16 @@ class RingtonesFragment : Fragment() {
     }
 
     private fun applyRingtone(file: File) {
-        if (!Settings.System.canWrite(requireContext())) {
-            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
-            startActivity(intent)
+        if(!Settings.System.canWrite(requireContext())) {
+            showPermissionDialog(requireContext())
         }
         else {
             try {
-                val values = ContentValues()
-                val toastMSG = "Ringtone is set"
+                val toastMSG = requireContext().getString(R.string.toast_ringtone_applied)
                 val ringtoneType = RingtoneManager.TYPE_RINGTONE
 
-                val sharedPref: SharedPreferences = requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
+                val sharedPref: SharedPreferences =
+                    requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
                 val uri = Uri.parse(sharedPref.getString(file.nameWithoutExtension, null))
 
                 requireContext().contentResolver.openOutputStream(uri!!).use { os ->
@@ -196,7 +229,7 @@ class RingtonesFragment : Fragment() {
 
         val uri: Uri = FileProvider.getUriForFile(
             requireContext(),
-            "it.frank.glyphify.provider", // replace with your FileProvider authority
+            "it.frank.glyphify.provider",
             file
         )
 
@@ -208,6 +241,23 @@ class RingtonesFragment : Fragment() {
         }
 
         startActivity(Intent.createChooser(shareIntent, "Share file via"))
+    }
+
+    private fun deleteRingtone(file: File): Boolean {
+        val fileName = file.nameWithoutExtension
+
+        if(file.delete()) {
+            //remove Uri from shared pref
+            val sharedPref: SharedPreferences =
+                requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.remove(fileName)
+            editor.apply()
+
+            return true
+        }
+
+        return false
     }
 
 

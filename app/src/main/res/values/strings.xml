@@ -4,11 +4,13 @@
     <string name="title_ringtones">Ringtones</string>
     <string name="btn_file_selection">Select a file</string>
     <string name="btn_desc_file_selection">Select a file</string>
-    <string name="title_alert_output_name">Ringtone name</string>
     <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
-    <string name="posbtn_alert_output_name">OK</string>
-    <string name="negbtn_alert_output_name">Abort</string>
-    <string name="btn_apply_ringtone">Apply as ringtone</string>
+    <string name="btn_apply_ringtone">Apply ringtone</string>
     <string name="btn_share">Share</string>
     <string name="btn_delete">Delete</string>
+    <string name="toast_ringtone_applied">Default ringtone applied</string>
+    <string name="alert_settings_perm_title">Permission required</string>
+    <string name="alert_settings_perm_msg">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
+    <string name="alert_posbtn">OK</string>
+    <string name="alert_negbtn">Abort</string>
 </resources>
