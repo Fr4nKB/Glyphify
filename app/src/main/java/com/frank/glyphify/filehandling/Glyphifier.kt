@@ -19,20 +19,18 @@ import com.arthenica.ffmpegkit.ReturnCode
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.Locale
-import org.jtransforms.fft.FloatFFT_1D
 import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
+import java.util.SortedMap
 import java.util.zip.Deflater
-import kotlin.math.hypot
+import kotlin.random.Random
 
 
 class Glyphifier(private val context: Context, workerParams: WorkerParameters): Worker(context, workerParams) {
 
     companion object {
         const val MAX_LIGHT = 4096
+        const val LIGHT_DURATION_MS = 16
         const val LEDS_PATTERN = "-0,-1,-2,-3,-4,c-0,-4,c-0,-3,-4,s-0,-1,-2,-3,-4,c-4,c-4,s-0," +
                 "-1,-2,-4,c-2,-4,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,-1,-2,s-0,-1,-2,-3," +
                 "-4,c-2,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,s-0,-1,-2,-4," +
@@ -94,7 +92,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         val input = data.toByteArray(Charsets.UTF_8)
 
         // Compress the bytes
-        val deflater = Deflater()
+        val deflater = Deflater(Deflater.BEST_COMPRESSION)
         deflater.setInput(input)
         deflater.finish()
 
@@ -108,10 +106,17 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         val compressedBytes = outputStream.toByteArray()
 
         // Encode to Base64
-        val base64Data = Base64.encodeToString(compressedBytes, Base64.DEFAULT)
+        var base64Data = Base64.encodeToString(compressedBytes, Base64.DEFAULT)
 
-        return base64Data
+        // Remove padding bytes
+        base64Data = base64Data.trimEnd('=')
+
+        // Add newline every 76 characters
+        val formattedData = base64Data.chunked(76).joinToString("\n")
+
+        return "$formattedData\n"
     }
+
 
     /**
      * Loads the file specified in the uri in the app's filesystem as a temporary file,
@@ -149,82 +154,70 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return true
     }
 
-    /**
-     * Transforms stereo data into mono channel data
-     * @param inputPath: path of the file for the stereo data
-     * @return the converted mono channel data
-     * */
-    private fun getMonoAudioData(inputPath: String): ArrayList<Float> {
-        // prepare to read wav file
-        val wavFile = File(inputPath)
-        val headerSize = 44     // common header size
-        val audioDataBytes = ByteArray(wavFile.length().toInt() - headerSize)
-
-        // load and skip header
-        val inputStream = FileInputStream(wavFile)
-        inputStream.skip(headerSize.toLong())
-
-        // read the audio data
-        inputStream.read(audioDataBytes)
-        inputStream.close()
-
-        // allows to read bytes as short(2 bytes) values
-        val audioData = ByteBuffer.wrap(audioDataBytes).order(ByteOrder.LITTLE_ENDIAN)
-            .asShortBuffer()
-
-        // convert from to stereo to mono by doing the average of channels
-        val monoData = ArrayList<Float>(audioData.remaining() / 2)
-        while (audioData.remaining() >= 2) {
-            val left = audioData.get()
-            val right = audioData.get()
-            monoData.add((left + right) / 2.0f)
-        }
-
-        return monoData
+    private fun calculateAverageEnergy(beatsBand: List<Pair<Int, Double>>): Double {
+        val totalEnergy = beatsBand.sumOf { it.second }
+        val averageEnergy = if (beatsBand.isNotEmpty()) totalEnergy / beatsBand.size else 0.0
+        return averageEnergy
     }
 
-    /**
-     * Derives the led data pattern based on the amplitudes
-     * @param amplitudes: array of amplitudes extracted from the audio
-     * @return an array containing the intensity of each led zone
-     * */
-    private fun deriveLEDData(amplitudes:  Array<FloatArray>): MutableList<Array<Int>> {
-        // normalize the results to be between 0 and 4095
-        // calculate the average amplitude for each region
-        val avgValuePerColumn = amplitudes[0].indices.map { i -> amplitudes.map { it[i] }.average() }
-        // normalize based on the average value
-        for (i in amplitudes.indices) {
-            for (j in amplitudes[i].indices) {
-                amplitudes[i][j] *= (MAX_LIGHT / (2 * avgValuePerColumn[j])).toFloat()
+    private fun normalizeBeats(beats: List<Pair<Int, Double>>): List<Pair<Double, Int>> {
+        val avgEnergy = calculateAverageEnergy(beats)
+        return beats.map { (time, energy) ->
+            val normalizedTime = kotlin.math.round((time / LIGHT_DURATION_MS).toDouble()) * LIGHT_DURATION_MS
+            val normalizedEnergy = (energy * (MAX_LIGHT / (2.0 * avgEnergy))).toInt()
+            Pair(normalizedTime, normalizedEnergy)
+        }
+    }
 
-                // clamping to not exceed the maximum value for light intensity
-                if (amplitudes[i][j] > MAX_LIGHT) {
-                    amplitudes[i][j] = (MAX_LIGHT - 1).toFloat()
+    private fun beats2Map(bandsBeats: List<List<Pair<Int, Double>>>): SortedMap<Double, List<Int>> {
+        val normalizedBandsBeats = bandsBeats.map { normalizeBeats(it) }
+
+        val bandBeatsMap = mutableMapOf<Double, MutableList<Int>>()
+        for ((bandNum, beats) in normalizedBandsBeats.withIndex()) {
+            for ((timestamp, lightIntensity) in beats) {
+                if (timestamp !in bandBeatsMap) {
+                    bandBeatsMap[timestamp] = MutableList(5) { if (it == bandNum) lightIntensity else 0 }
+                }
+                else {
+                    bandBeatsMap[timestamp]?.set(bandNum, lightIntensity)
                 }
             }
         }
 
-        // convert to integers
-        val resultsInt: Array<Array<Int>> = amplitudes.map { row ->
-            row.map { it.toInt() }.toTypedArray()
-        }.toTypedArray()
+        return bandBeatsMap.toSortedMap()
+    }
 
-        // spread light pattern in the 48ms window
-        // this makes the light effect more evident
-        val lightData = mutableListOf<Array<Int>>()
-        for (row in resultsInt) {
-            // each line lasts 16ms, thus 3 lines are needed
-            for (i in 0 until 3) {
-                val newRow = when(i) {
-                    0 -> arrayOf(row[0], row[1], 0, 0, 0)
-                    1 -> arrayOf(0, 0, row[2], 0, 0)
-                    else -> arrayOf(0, 0, 0, row[3], row[4])
+    fun distributeBeats(bandsBeatsMap: Map<Double, List<Int>>): MutableMap<Double, MutableList<Int>> {
+        val distributedBeats = mutableMapOf<Double, MutableList<Int>>()
+        for ((key, values) in bandsBeatsMap) {
+            if (values.count { it != 0 } > 1) {
+                for (i in 0 until 5) {
+                    if (values[i] != 0) {
+                        var offset = 0
+                        if (Random.nextInt(0, 2) == 0) {
+                            offset -= Random.nextInt(1, 3) * LIGHT_DURATION_MS
+                        }
+                        else {
+                            offset += Random.nextInt(1, 3) * LIGHT_DURATION_MS
+                        }
+
+                        val newTs = key + offset
+
+                        if (newTs !in distributedBeats) {
+                            distributedBeats[newTs] = MutableList(5) { if (it == i) values[i] else 0 }
+                        }
+                        else {
+                            distributedBeats[newTs]?.set(i, values[i])
+                        }
+                    }
                 }
-                lightData.add(newRow)
+            }
+            else {
+                distributedBeats[key] = values.toMutableList()
             }
         }
 
-        return lightData
+        return distributedBeats
     }
 
     /**
@@ -268,67 +261,58 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
      * @param sampleRate: sample rate of the audio to be set as ringtone
      * @return the compressed and encoded data for the Glyph show
      * */
-    private fun buildAuthorTag(sampleRate: Int): String {
+    private fun buildAuthorTag(data: MutableMap<Double, MutableList<Int>>, linDecay: Int): String {
+        val keys = data.keys.toList()
 
-        val monoData = getMonoAudioData("$path/temp.wav")
+        val result = mutableListOf<MutableList<Int>>()
 
-        // define frequency regions according to sample rate
-        val freqRegions = floatArrayOf(0f, sampleRate * 0.02f, sampleRate * 0.04f,
-            sampleRate * 0.06f, sampleRate * 0.08f, sampleRate * 0.1f)
-
-        // calculate window size for 48ms
-        val windowSize = (sampleRate * 0.048).toInt()
-
-        // create hanning window
-        val hanningWindow = FloatArray(windowSize) {
-            (0.5f - 0.5f * kotlin.math.cos(2.0 * kotlin.math.PI * it / windowSize)).toFloat()
+        var currentTs = keys[0]
+        var numEmpty = (currentTs / 16).toInt() - 1
+        if (numEmpty > 0) {
+            result.addAll(List(numEmpty) { mutableListOf(0, 0, 0, 0, 0) })
         }
 
-        // convert frequency regions to indices
-        val freqRegionsIndices = IntArray(freqRegions.size) {
-            (freqRegions[it] / (sampleRate / 2) * (windowSize / 2)).toInt()
-        }
+        for (i in keys.indices) {
+            val nextTs = if (i + 1 < keys.size) keys[i + 1] else 1.0
 
-        val resultsSpectrum = mutableListOf<FloatArray>()   // hold results
+            var currentData = data[keys[i]]!!
+            result.add(currentData)
 
-        // Iterate over audio data with step size equal to window size
-        // Only process slices of data that are equal to the window size
-        val windows = monoData.windowed(windowSize, windowSize, false)
-        for (readOnlyWindow in windows) {
-            val window = readOnlyWindow.toMutableList()
-            // apply hanning window
-            for (j in window.indices) {
-                window[j] *= hanningWindow[j]
+            while (currentTs < nextTs) {
+                currentTs += LIGHT_DURATION_MS
+                val nextItem = mutableListOf<Int>()
+                var allZero = 0
+
+                for (elem in currentData) {
+                    if (elem != 0) {
+                        val newVal = if (elem - linDecay < 0) 0 else elem - linDecay
+                        nextItem.add(newVal)
+                    }
+                    else {
+                        allZero++
+                        nextItem.add(0)
+                    }
+                }
+
+                result.add(nextItem)
+                if (allZero == 5) {
+                    break
+                }
+
+                currentData = nextItem
             }
 
-            // apply FFT
-            val fft = FloatFFT_1D(windowSize.toLong())
-            fft.realForward(window.toFloatArray())
-
-            // calculate average amplitude for each region
-            val avgAmplitudes = FloatArray(freqRegionsIndices.size - 1)
-            for (j in avgAmplitudes.indices) {
-                val start = freqRegionsIndices[j]
-                val end = freqRegionsIndices[j + 1]
-                avgAmplitudes[j] = window.subList(start, end).map { hypot(it, 0.0f) }.average()
-                    .toFloat()
+            numEmpty = ((nextTs - currentTs) / 16).toInt() - 1
+            if (numEmpty > 0) {
+                result.addAll(List(numEmpty) { mutableListOf(0, 0, 0, 0, 0) })
             }
-
-            resultsSpectrum.add(avgAmplitudes)
+            currentTs += numEmpty * LIGHT_DURATION_MS
         }
 
-        val results = resultsSpectrum.toTypedArray()
+        val lines = result.joinToString(",\r\n") { it.joinToString(",") }
 
-        // derive LED data from average amplitudes in each region
-        val lightData = deriveLEDData(results)
-
-        // convert to csv
-        val csvBuilder = StringBuilder()
-        for (row in lightData) {
-            csvBuilder.append(row.joinToString(","))
-            csvBuilder.append("\n")
-        }
-        val csvString = csvBuilder.toString()
+        // Join all lines into a single string, with each line ending with ',\r\n'
+        val csvString = "$lines,\r\n"
 
         return compressAndEncode(csvString)
     }
@@ -447,7 +431,13 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         setProgressAsync(workDataOf("PROGRESS" to 20))
 
         // build led animation based on selected song
-        val authorTag = buildAuthorTag(audioInfo.second)
+        val rawBeats = BeatDetector.detectBeatsAndFrequencies(context, "$path/temp.wav")
+        setProgressAsync(workDataOf("PROGRESS" to 30))
+        val normalizedBeats = beats2Map(rawBeats)
+        setProgressAsync(workDataOf("PROGRESS" to 40))
+        val distributedBeats = distributeBeats(normalizedBeats)
+        setProgressAsync(workDataOf("PROGRESS" to 50))
+        val authorTag = buildAuthorTag(distributedBeats, 100)
         if (authorTag == "") return Result.failure()
 
         setProgressAsync(workDataOf("PROGRESS" to 80))

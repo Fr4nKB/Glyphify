@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.chaquo.python")
 }
 
 android {
@@ -15,6 +16,10 @@ android {
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            // On Apple silicon, you can omit x86_64.
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -36,6 +41,29 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    flavorDimensions += "pyVersion"
+    productFlavors {
+        create("py310") { dimension = "pyVersion" }
+        create("py311") { dimension = "pyVersion" }
+    }
+
+}
+
+chaquopy {
+    defaultConfig {
+        buildPython(System.getenv("PYTHON38_PATH"))
+        version = "3.8"
+        pip {
+            install("numpy")
+            install("numba")
+            install("joblib==1.0.0")
+            install("resampy==0.2.2")
+            install("librosa==0.7.2")
+        }
+    }
+    productFlavors { }
+    sourceSets { }
 }
 
 dependencies {
