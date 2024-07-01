@@ -20,8 +20,18 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/dot_matri"
             android:layout_gravity="center_vertical"
-            android:text="GLIPHIFY"
+            android:text="GLYPHIFY"
             android:textSize="35sp" />
+
+        <ImageButton
+            android:id="@+id/btn_donate"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_gravity="start"
+            android:src="@drawable/ic_donate"
+            android:background="@drawable/circle"
+            android:contentDescription="Donate"
+            app:tint="@android:color/white" />
 
         <LinearLayout
             android:id="@+id/toolbar_btns_wrapper"

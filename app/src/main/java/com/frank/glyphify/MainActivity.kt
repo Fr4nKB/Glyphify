@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -94,6 +95,13 @@ class MainActivity : AppCompatActivity() {
                 editor.putBoolean("firstboot", false)
                 editor.apply()
             }
+        }
+
+        findViewById<ImageButton>(R.id.btn_donate).setOnClickListener() {
+            startActivity(
+                Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
+            )
         }
 
     }

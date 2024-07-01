@@ -18,6 +18,8 @@
     <EditText
         android:id="@+id/editText"
         android:backgroundTint="@color/grey"
+        android:textCursorDrawable="@null"
+        android:textColor="@color/white"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:layout_width="match_parent"
