@@ -9,10 +9,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.transition.Visibility
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -74,6 +76,11 @@ class HomeFragment : Fragment() {
                 )
             )
         );
+    }
+
+    override fun onResume() {
+        super.onResume()
+        requireActivity().findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
