@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.chaquo.python")
 }
 
 android {
@@ -12,9 +13,12 @@ android {
         minSdk = 34
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -36,6 +40,23 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+}
+
+chaquopy {
+    defaultConfig {
+        buildPython(System.getenv("PYTHON38_PATH"))
+        version = "3.8"
+        pip {
+            install("numpy")
+            install("numba")
+            install("joblib==1.0.0")
+            install("resampy==0.2.2")
+            install("librosa==0.7.2")
+        }
+    }
+    productFlavors { }
+    sourceSets { }
 }
 
 dependencies {
