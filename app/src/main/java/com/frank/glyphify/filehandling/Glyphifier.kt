@@ -16,6 +16,11 @@ import androidx.work.workDataOf
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFprobeKit
 import com.arthenica.ffmpegkit.ReturnCode
+import com.frank.glyphify.filehandling.Constants.ALBUM_NAME
+import com.frank.glyphify.filehandling.Constants.LEDS_PATTERN
+import com.frank.glyphify.filehandling.Constants.LIGHT_DURATION_MS
+import com.frank.glyphify.filehandling.Constants.MAX_LIGHT
+import com.frank.glyphify.filehandling.Constants.NUM_ZONES
 import com.frank.glyphify.filehandling.FileHandling.compressAndEncode
 import com.frank.glyphify.filehandling.FileHandling.getAudioDetails
 import com.frank.glyphify.filehandling.FileHandling.getFileExtension
@@ -36,15 +41,6 @@ import kotlin.random.Random
 
 class Glyphifier(private val context: Context, workerParams: WorkerParameters): Worker(context, workerParams) {
 
-    companion object {
-        const val MAX_LIGHT = 4095
-        const val LIGHT_DURATION_MS = 16
-        const val LEDS_PATTERN = "-0,-1,-2,-3,-4,c-0,-4,c-0,-3,-4,s-0,-1,-2,-3,-4,c-4,c-4,s-0," +
-                "-1,-2,-4,c-2,-4,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,-1,-2,s-0,-1,-2,-3," +
-                "-4,c-2,c-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,s-0,-1,-2,-3,-4,c-0,-2,c-0,s-0,-1,-2,-4," +
-                "c-2,-4,c-0,-1,-2,-3,-4"
-        const val ALBUM_NAME = "Glyphify"
-    }
     private val path = context.filesDir.path
     private val uri = Uri.parse(inputData.getString("uri"))
     private val outName = inputData.getString("outputName")
@@ -92,15 +88,26 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return averageEnergy
     }
 
+    /**
+     * Given a beat array it normalizes the timestamp to the closest timestamp multiple of
+     * LIGHT_DURATION_MS and maps the energy to a value between 0 and MAX_LIGHT
+     * @param beats: beats array
+     * @return the normalized beats array
+     * */
     private fun normalizeBeats(beats: List<Pair<Int, Double>>): List<Pair<Int, Int>> {
         val avgEnergy = calculateAverageEnergy(beats)
         return beats.map { (time, energy) ->
-            val normalizedTime = (kotlin.math.round((time / LIGHT_DURATION_MS).toDouble()) * LIGHT_DURATION_MS).toInt()
+            val normalizedTime = (time + LIGHT_DURATION_MS / 2) / LIGHT_DURATION_MS * LIGHT_DURATION_MS
             val normalizedEnergy = (energy * (MAX_LIGHT / (2.0 * avgEnergy))).toInt()
             Pair(normalizedTime, normalizedEnergy)
         }
     }
 
+    /**
+     * Converts a 2D array of beats to a sorted map, grouping on the timestamp
+     * @param bandsBeats: 2D array of beats
+     * @return sorted map of beats grouped by timestamp
+     * */
     private fun beats2Map(bandsBeats: List<List<Pair<Int, Double>>>): SortedMap<Int, List<Int>> {
         val normalizedBandsBeats = bandsBeats.map { normalizeBeats(it) }
 
@@ -108,7 +115,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         for ((bandNum, beats) in normalizedBandsBeats.withIndex()) {
             for ((timestamp, lightIntensity) in beats) {
                 if (timestamp !in bandBeatsMap) {
-                    bandBeatsMap[timestamp] = MutableList(5) { if (it == bandNum) lightIntensity else 0 }
+                    bandBeatsMap[timestamp] = MutableList(NUM_ZONES) { if (it == bandNum) lightIntensity else 0 }
                 }
                 else {
                     bandBeatsMap[timestamp]?.set(bandNum, lightIntensity)
@@ -119,30 +126,39 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return bandBeatsMap.toSortedMap()
     }
 
+    /**
+     * Randomizes which zone is used to represent high frequencies for a given beat
+     * @param bandsBeatsMap: beats map grouped by timestamp
+     * @return randomized beats map grouped by timestamp
+     * */
     private fun randomizeLightEffectPosition(bandsBeatsMap: Map<Int, List<Int>>): MutableMap<Int, MutableList<Int>> {
         val randomizedBeats = mutableMapOf<Int, MutableList<Int>>()
 
         for ((timestamp, lightIntensities) in bandsBeatsMap) {
+            // find max value across designed high frequencies zones
             val maxValue = lightIntensities.withIndex().filter { it.index <= 1 || it.index == 3 }.maxOf { it.value }
+
             val highIndices = listOf(0, 1, 3)
             val randomChoice = Random.nextInt(3)
 
+            // reset every zone
             randomizedBeats[timestamp] = lightIntensities.toMutableList()
             randomizedBeats[timestamp]?.set(0, 0)
             randomizedBeats[timestamp]?.set(1, 0)
             randomizedBeats[timestamp]?.set(3, 0)
 
+            // set zones randomly
             when (randomChoice) {
-                0 -> { // 1/3 of the time, only one slot is used
+                0 -> { // 1/3 of the time, only one zone is used
                     val highIndex = highIndices[Random.nextInt(highIndices.size)]
                     randomizedBeats[timestamp]?.set(highIndex, maxValue)
                 }
-                1 -> { // 1/3 of the time, two random slots out of three are used
+                1 -> { // 1/3 of the time, two random zones out of three are used
                     val shuffledIndices = highIndices.shuffled()
                     randomizedBeats[timestamp]?.set(shuffledIndices[0], maxValue)
                     randomizedBeats[timestamp]?.set(shuffledIndices[1], maxValue)
                 }
-                2 -> { // 1/3 of the time, all three slots are used
+                2 -> { // 1/3 of the time, all three zones are used
                     for (index in highIndices) {
                         randomizedBeats[timestamp]?.set(index, maxValue)
                     }
@@ -153,7 +169,11 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return randomizedBeats
     }
 
-
+    /**
+     * If a time slot has more than 1 zone active, those zones are redistributed randomly in time
+     * @param bandsBeatsMap: beats map grouped by timestamp
+     * @return time distributed beats map grouped by timestamp
+     * */
     private fun distributeBeats(bandsBeatsMap: Map<Int, List<Int>>): MutableMap<Int, MutableList<Int>> {
         val distributedBeats = mutableMapOf<Int, MutableList<Int>>()
 
@@ -175,7 +195,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
                         }
 
                         if (newTs !in distributedBeats) {
-                            distributedBeats[newTs] = MutableList(5) { if (it == i) values[i] else 0 }
+                            distributedBeats[newTs] = MutableList(NUM_ZONES) { if (it == i) values[i] else 0 }
                         }
                         else {
                             distributedBeats[newTs]?.set(i, values[i])
@@ -192,7 +212,12 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         return distributedBeats
     }
 
-    private fun addBeatsFades(bandsBeatsList: MutableMap<Int, MutableList<Int>>):
+    /**
+     * Add a randomized light effect to each zone in each time slot
+     * @param bandsBeatsMap: beats map grouped by timestamp
+     * @return beats map grouped by timestamp with random effects
+     * */
+    private fun addBeatsEffects(bandsBeatsList: MutableMap<Int, MutableList<Int>>):
             MutableMap<Int, MutableList<Int>> {
 
         val toZones = mutableMapOf<Int, MutableList<Pair<Int, Int>>>()
@@ -200,43 +225,47 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         // first group beats into zones
         for ((key, values) in bandsBeatsList) {
             for ((index, value) in values.withIndex()) {
-                if (index !in toZones) {
-                    toZones[index] = MutableList(1) { Pair<Int, Int>(key, value) }
-                }
-                else {
-                    toZones[index]?.add(Pair<Int, Int>(key, value))
+                if(value != 0) {
+                    if (index !in toZones) {
+                        toZones[index] = MutableList(1) { Pair<Int, Int>(key, value) }
+                    }
+                    else {
+                        toZones[index]?.add(Pair<Int, Int>(key, value))
+                    }
                 }
             }
         }
 
         val fadedBeats = mutableMapOf<Int, MutableList<Int>>()
 
-        // then apply fading for each pair of (timestamp, light)
+        // then apply effects for each pair of (timestamp, light)
         for ((zone, beats) in toZones) {
             val tmp: MutableList<Pair<Int, Int>> = mutableListOf()
+
             for (beat in beats) {
+                // these values have been fine tuned across multiple tries
                 when(zone) {
                     0 -> {
                         if(Random.nextInt(0, 2) == 1) {
-                            tmp.addAll(expDecay(beat, 2, 20))
+                            tmp.addAll(expDecay(beat, 2, 18))
                         }
                         tmp.addAll(circusTent(beat, 6))
                     }
                     1 -> {
                         if(Random.nextInt(0, 2) == 1) {
-                            tmp.addAll(expDecay(beat, 2, 20))
+                            tmp.addAll(expDecay(beat, 2, 15))
                         }
                         tmp.addAll(circusTent(beat, 8))
                     }
                     2 -> {
                         if(Random.nextInt(0, 2) == 1) {
-                            tmp.addAll(expDecay(beat, 2, 25))
+                            tmp.addAll(expDecay(beat, 2, 22))
                         }
-                        else tmp.addAll(circusTent(beat, 12))
+                        else tmp.addAll(circusTent(beat, 10))
                     }
                     3 -> {
                         if(Random.nextInt(0, 2) == 1) {
-                            tmp.addAll(expDecay(beat, 2, 20))
+                            tmp.addAll(expDecay(beat, 2, 15))
                         }
                         else tmp.addAll(circusTent(beat, 10))
                     }
@@ -250,14 +279,15 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
             }
 
             for ((timestamp, lightIntensity) in tmp) {
-                fadedBeats.getOrPut(timestamp) { MutableList(5) { 0 } }.apply {
-                    val tmpVal = this[zone] + lightIntensity
-                    this[zone] = if(tmpVal > MAX_LIGHT) MAX_LIGHT else tmpVal
+                fadedBeats.getOrPut(timestamp) { MutableList(NUM_ZONES) { 0 } }.apply {
+                    // if some light intensity data is overlapping chose the bigger one
+                    this[zone] = if(lightIntensity > this[zone]) lightIntensity else this[zone]
+                    this[zone] = if(this[zone] > MAX_LIGHT) MAX_LIGHT else this[zone]
                 }
             }
         }
 
-        return fadedBeats
+        return fadedBeats.toSortedMap()
     }
 
     /**
@@ -301,7 +331,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
      * @param sampleRate: sample rate of the audio to be set as ringtone
      * @return the compressed and encoded data for the Glyph show
      * */
-    private fun buildAuthorTag(data: MutableMap<Int, MutableList<Int>>, linDecay: Int): String {
+    private fun buildAuthorTag(data: MutableMap<Int, MutableList<Int>>): String {
         val keys = data.keys.toList()
 
         val result = mutableListOf<MutableList<Int>>()
@@ -311,9 +341,9 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         for (i in keys.indices) {
             val nextTs = keys[i]
 
-            val numEmpty = ((nextTs - currentTs) / 16).toInt() - 1
+            val numEmpty = (nextTs - currentTs) / 16 - 1
             if (numEmpty > 0) {
-                result.addAll(List(numEmpty) { mutableListOf(0, 0, 0, 0, 0) })
+                result.addAll(List(numEmpty) { MutableList(NUM_ZONES) { 0 } })
             }
 
             var currentData = data[nextTs]!!
@@ -326,7 +356,6 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
 
         // Join all lines into a single string, with each line ending with ',\r\n'
         val csvString = "$lines,\r\n"
-        Log.d("DEBUG1", csvString)
 
         return compressAndEncode(csvString)
     }
@@ -365,7 +394,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
     private fun buildOgg(outputName: String, custom1Tag: String, authorTag: String): Boolean {
         val sharedPref: SharedPreferences =
             context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        val appVers = sharedPref.getString("appVersion", "Spacewar Glyph Composer")
+        val appVers = sharedPref.getString("appVersion", "v1-Spacewar Glyph Composer")
 
         try {
             // convert from wav to ogg
@@ -374,6 +403,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
                     "-metadata TITLE='$ALBUM_NAME' " +
                     "-metadata ALBUM='$ALBUM_NAME' " +
                     "-metadata CUSTOM1='$custom1Tag' " +
+                    "-metadata CUSTOM2='$NUM_ZONES'cols " +
                     "-metadata AUTHOR='$authorTag' " +
                     "\"$path/$outputName.ogg\" -y")
 
@@ -387,7 +417,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
                 put(MediaStore.MediaColumns.DISPLAY_NAME, "$uniqueName.ogg")
                 put(MediaStore.MediaColumns.MIME_TYPE, "audio/ogg")
                 put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RINGTONES + File.separator + "Compositions")
-                put(MediaStore.Audio.AudioColumns.COMPOSER, "Spacewar Glyph Composer")
+                put(MediaStore.Audio.AudioColumns.COMPOSER, appVers)
                 put(MediaStore.Audio.AudioColumns.ALBUM, ALBUM_NAME)
                 put(MediaStore.Audio.AudioColumns.TITLE, ALBUM_NAME)
                 put(MediaStore.Audio.AudioColumns.IS_RINGTONE, true)
@@ -427,7 +457,6 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
             prepareInput(uri)
         }
         catch (e: Exception) {
-            Log.d("DEBUG", e.toString())
             return Result.failure()
         }
 
@@ -457,10 +486,10 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters): 
         val distributedBeats = distributeBeats(randomizedBeats)
         setProgressAsync(workDataOf("PROGRESS" to 60))
 
-        val fadedBeats = addBeatsFades(distributedBeats)
+        val fadedBeats = addBeatsEffects(distributedBeats)
         setProgressAsync(workDataOf("PROGRESS" to 70))
 
-        val authorTag = buildAuthorTag(fadedBeats, 100)
+        val authorTag = buildAuthorTag(fadedBeats)
         if (authorTag == "") return Result.failure()
 
         setProgressAsync(workDataOf("PROGRESS" to 80))

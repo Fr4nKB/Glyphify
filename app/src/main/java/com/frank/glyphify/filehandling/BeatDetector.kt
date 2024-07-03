@@ -6,7 +6,18 @@ import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 
 object BeatDetector {
+
+    /**
+     * Given a path to a wav file it returns a 2D array of beats: each beat is a
+     * pair (timestamp, energy), beats are grouped into high-freq-right-ch, high-freq-low-ch,
+     * low-freq-mono, high-freq-mono and low-freq-mono (yes, again)
+     * @param context: app context
+     * @param filepath: path to wav file in app's filesystem
+     * @return 2D array containing the beats
+     * */
     fun detectBeatsAndFrequencies(context: Context, filepath: String): List<List<Pair<Int, Double>>> {
+        // this method uses Chaquopy to execute python code and the librosa which is a python library
+        // that let us extract beats from a tune
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(context))
         }

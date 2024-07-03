@@ -1,9 +1,12 @@
 package com.frank.glyphify.filehandling
 
+import com.frank.glyphify.filehandling.Constants.LIGHT_DURATION_MS
 import kotlin.math.pow
 
+/**
+ * A collection of light effects which are applied to a single beat
+ */
 object LightEffects {
-    private const val LIGHT_DURATION_MS = 16
 
     fun expDecay(beat: Pair<Int, Int>, slotsIn: Int, slotsOut: Int):
             List<Pair<Int, Int>> {

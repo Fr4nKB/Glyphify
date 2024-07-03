@@ -33,11 +33,15 @@ class MainActivity : AppCompatActivity() {
 
         if(manufacturer.equals("Nothing", ignoreCase = true)) {
             if(model.equals("A063")) {
-                editor.putString("appVersion", "Spacewar Glyph Composer")
+                editor.putString("appVersion", "v1-Spacewar Glyph Composer")
                 editor.apply()
             }
             else if(model.equals("A065")) {
-                editor.putString("appVersion", "Pong Glyph Composer")
+                editor.putString("appVersion", "v1-Pong Glyph Composer")
+                editor.apply()
+            }
+            else if(model.equals("A142")) {
+                editor.putString("appVersion", "v1-Pacman Glyph Composer")
                 editor.apply()
             }
         }

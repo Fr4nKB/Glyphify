@@ -13,11 +13,10 @@ android {
         minSdk = 34
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            // On Apple silicon, you can omit x86_64.
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
     }
@@ -40,12 +39,6 @@ android {
     }
     buildFeatures {
         viewBinding = true
-    }
-
-    flavorDimensions += "pyVersion"
-    productFlavors {
-        create("py310") { dimension = "pyVersion" }
-        create("py311") { dimension = "pyVersion" }
     }
 
 }
