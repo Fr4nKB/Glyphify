@@ -19,9 +19,10 @@ The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
 ## Top Donors
 
 A huge thanks to everyone which believes in this project and shows it by donating:
--  Robert F. - 5,54€
--  Andrew A. - 5,54€
--  Simona D.C. - 2.95€
+- Mirko D. - 98.76€ (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
+- Robert F. - 5.54€
+- Andrew A. - 5.54€
+- Simona D.C. - 2.95€
 
 
 **This app is free and ad-free**.\
