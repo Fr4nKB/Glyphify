@@ -37,7 +37,7 @@ class RingtonesFragment : Fragment() {
     private fun showPermissionDialog(context: Context) {
         Dialog.showDialog(
             context,
-            R.layout.ask_permission,
+            R.layout.dialog_perm_settings,
             mapOf(
                 R.id.positiveButton to { startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)) },
                 R.id.negativeButton to {}

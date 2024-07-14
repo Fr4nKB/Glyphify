@@ -4,25 +4,33 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.transition.Visibility
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.frank.glyphify.Constants.PHONE2_MODEL_ID
+import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
 import com.frank.glyphify.databinding.FragmentHomeBinding
-import com.frank.glyphify.filehandling.Glyphifier
+import com.frank.glyphify.glyph.Glyphifier
 import com.frank.glyphify.ui.dialogs.Dialog
+import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 import com.google.android.material.button.MaterialButton
+import kotlin.random.Random
 
 
 class HomeFragment : Fragment() {
@@ -33,7 +41,7 @@ class HomeFragment : Fragment() {
     private fun showNameDialog(context: Context, onNameEntered: (String) -> Unit) {
         Dialog.showDialog(
             context,
-            R.layout.output_name_dialog,
+            R.layout.dialog_output_name,
             mapOf(
                 R.id.positiveButton to {
                     dialogView -> onNameEntered(
@@ -60,11 +68,18 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireView().findViewById<MaterialButton>(R.id.btn_donate).setOnClickListener() {
+            startActivity(
+                Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
+            )
+        }
+
         requireView().findViewById<MaterialButton>(R.id.select_file).setOnClickListener {
             val intent = Intent()
                 .setType("audio/*")
                 .setAction(Intent.ACTION_GET_CONTENT)
-            startActivityForResult(Intent.createChooser(intent, "Select a file"), 1)
+            startActivityForResult(Intent.createChooser(intent, "Select a file"), 10)
         }
 
         // color the progress bar in red and make it visible
@@ -76,6 +91,10 @@ class HomeFragment : Fragment() {
                 )
             )
         );
+
+        if(Build.MODEL == PHONE2_MODEL_ID) {
+            requireView().findViewById<LinearLayout>(R.id.expanded_lin).visibility = View.VISIBLE
+        }
     }
 
     override fun onResume() {
@@ -86,13 +105,15 @@ class HomeFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 1 && resultCode == RESULT_OK) {
+        if (requestCode == 10 && resultCode == RESULT_OK) {
             val selectedFileUri = data?.data // The URI with the location of the file
             if (selectedFileUri != null) {
 
                 showNameDialog(requireContext()) { name ->
+                    val expanded = requireView().findViewById<CheckBox>(R.id.expanded_checkbox).isChecked
                     val data = Data.Builder()
                         .putString("uri", selectedFileUri.toString())
+                        .putBoolean("expanded", expanded)
                         .putString("outputName", name)
                         .build()
 
@@ -115,6 +136,12 @@ class HomeFragment : Fragment() {
                                 if (workInfo.state.isFinished) {
                                     progressBar.visibility = View.GONE
                                     selectFileButton.isEnabled = true // Re-enable the button
+
+                                    val randomNumber = Random.nextInt(0, 3)
+                                    if(randomNumber == 2) {
+                                        val permHandler = PermissionHandling(requireActivity())
+                                        supportMe(requireContext(), permHandler)
+                                    }
                                 }
                             }
                         })

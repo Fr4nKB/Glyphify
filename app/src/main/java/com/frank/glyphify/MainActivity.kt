@@ -5,18 +5,27 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.frank.glyphify.databinding.ActivityMainBinding
-import com.frank.glyphify.ui.dialogs.Dialog
+import com.frank.glyphify.glyph.Glyphifier
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import com.frank.glyphify.Constants.CHANNEL_ID
+import com.frank.glyphify.Constants.PHONE1_MODEL_ID
+import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
+import com.frank.glyphify.Constants.PHONE2_MODEL_ID
+import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,15 +41,15 @@ class MainActivity : AppCompatActivity() {
         val editor: SharedPreferences.Editor = sharedPref.edit()
 
         if(manufacturer.equals("Nothing", ignoreCase = true)) {
-            if(model.equals("A063")) {
+            if(model.equals(PHONE1_MODEL_ID)) {
                 editor.putString("appVersion", "v1-Spacewar Glyph Composer")
                 editor.apply()
             }
-            else if(model.equals("A065")) {
+            else if(model.equals(PHONE2_MODEL_ID)) {
                 editor.putString("appVersion", "v1-Pong Glyph Composer")
                 editor.apply()
             }
-            else if(model.equals("A142")) {
+            else if(model.equals(PHONE2A_MODEL_ID)) {
                 editor.putString("appVersion", "v1-Pacman Glyph Composer")
                 editor.apply()
             }
@@ -49,25 +58,35 @@ class MainActivity : AppCompatActivity() {
         return "0"
     }
 
-    private fun supportMe() {
-        Dialog.showDialog(
-            this,
-            R.layout.first_boot,
-            mapOf(
-                R.id.paypalBtn to {
-                    startActivity(Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL")))
-                                  },
-                R.id.githubBtn to {
-                    startActivity(Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://github.com/Fr4nKB/Glyphify")))
-                                  },
-                R.id.negativeButton to {}
-            ),
-            isCancelable = false,
-            delayEnableButtonId = R.id.negativeButton,
-            delayMillis = 10000
-        )
+    private fun createNotificationChannel() {
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_ID, importance)
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun welcomeMsg() {
+        val sharedPref: SharedPreferences =
+            this.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        val isFirstBoot = sharedPref.getBoolean("firstboot", true)
+        val randomNumber = Random.nextInt(1, 11)
+
+        val permHandler = PermissionHandling(this)
+
+        if(isFirstBoot || randomNumber == 1) {
+            supportMe(this, permHandler)
+            if (isFirstBoot) {
+                val editor: SharedPreferences.Editor = sharedPref.edit()
+                editor.putBoolean("firstboot", false)
+                editor.apply()
+            }
+        }
+        else {
+            permHandler.askRequiredPermissions()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,28 +104,17 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         setComposerAppVersion()
+        createNotificationChannel()
 
-        val sharedPref: SharedPreferences =
-            this.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val singleWorkReq = OneTimeWorkRequestBuilder<AppUpdater>()
+            .build()
+        WorkManager.getInstance(this).enqueue(singleWorkReq)
 
-        val isFirstBoot = sharedPref.getBoolean("firstboot", true)
-        val randomNumber = Random.nextInt(1, 11)
+        val periodicWorkRequest = PeriodicWorkRequest.Builder(AppUpdater::class.java, 6, TimeUnit.HOURS)
+            .build()
+        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
-        if (isFirstBoot || randomNumber == 1) {
-            supportMe()
-            if (isFirstBoot) {
-                val editor: SharedPreferences.Editor = sharedPref.edit()
-                editor.putBoolean("firstboot", false)
-                editor.apply()
-            }
-        }
-
-        findViewById<ImageButton>(R.id.btn_donate).setOnClickListener() {
-            startActivity(
-                Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
-            )
-        }
-
+        welcomeMsg()
     }
+
 }

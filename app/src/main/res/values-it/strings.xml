@@ -9,11 +9,16 @@
     <string name="btn_apply_ringtone">Applica suoneria</string>
     <string name="btn_share">Condividi</string>
     <string name="btn_delete">Elimina</string>
+    <string name="btn_donate">Dona</string>
     <string name="toast_ringtone_applied">Suoneria di default applicata</string>
-    <string name="alert_settings_perm_title">Permesso richiesto</string>
-    <string name="alert_settings_perm_msg">Questa app ha bisogno di cambiare le impostazioni di sistema per applicare la suoneria. Vuoi concedere il permesso?</string>
+    <string name="alert_msg_perm_settings">Questa app ha bisogno di cambiare le impostazioni di sistema per applicare la suoneria. Vuoi concedere il permesso?</string>
+    <string name="alert_msg_perm_notifications">Consenti all\'app di inviarti notifiche per ricevere aggiornamenti</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Annulla</string>
+    <string name="title_new_version">Aggiornamento Glyphify</string>
+    <string name="msg_new_version">Una nuova versione è disponibile, premi per scaricare su GitHub</string>
+    <string name="service_battery_indicator_title">Servizio per l\'indicatore di batteria Glyph per Phone(2a). Chiudi Glyphify se non desideri questa feature.</string>
+    <string name="expanded_checkbox_desc">Usa tutte le 33 zone</string>
 
     <string name="support_me">Benvenuto! Questa è un\'app gratis e senza pubblicità fatta da uno studente. Se trovi valore nel mio lavoro e vorresti dimostrare il tuo apprezzamento, valuta la possibilità di fare una donazione o di assegnare una stella alla mia repository GitHub. Qualsiasi supporto è apprezzato, grazie per aver letto!</string>
     <string name="support_paypal">Comprami un caffè</string>

@@ -8,11 +8,16 @@
     <string name="btn_apply_ringtone">Apply ringtone</string>
     <string name="btn_share">Share</string>
     <string name="btn_delete">Delete</string>
+    <string name="btn_donate">Donate</string>
     <string name="toast_ringtone_applied">Default ringtone applied</string>
-    <string name="alert_settings_perm_title">Permission required</string>
-    <string name="alert_settings_perm_msg">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
+    <string name="alert_msg_perm_settings">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
+    <string name="alert_msg_perm_notifications">Allow notifications to be notified when a new update is published</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Abort</string>
+    <string name="title_new_version">Glyphify update</string>
+    <string name="msg_new_version">A new version is available, tap to download on GitHub</string>
+    <string name="service_battery_indicator_title">Glpyh battery indicator service for Phone(2a). Close Glyphify if you don\'t desire this feature.</string>
+    <string name="expanded_checkbox_desc">Use all 33 zones</string>
 
     <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
     <string name="support_paypal">Buy me a coffee</string>

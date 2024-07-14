@@ -2,8 +2,10 @@ package com.frank.glyphify.ui.dialogs
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
@@ -12,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
 
 object Dialog {
@@ -56,6 +59,35 @@ object Dialog {
 
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+
+    fun supportMe(context: Context, permHandler: PermissionHandling) {
+
+        showDialog(
+            context,
+            R.layout.first_boot,
+            mapOf(
+                R.id.paypalBtn to {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                        Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
+                    )
+                },
+                R.id.githubBtn to {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/Fr4nKB/Glyphify"))
+                    )
+                },
+                R.id.negativeButton to { permHandler.askRequiredPermissions() }
+            ),
+            isCancelable = false,
+            delayEnableButtonId = R.id.negativeButton,
+            delayMillis = 10000
+        )
     }
 
 

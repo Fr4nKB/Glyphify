@@ -13,30 +13,34 @@ android {
         minSdk = 34
         targetSdk = 34
         versionCode = 1
-        versionName = "1.1"
+        versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
+            abiFilters += listOf("arm64-v8a")
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         viewBinding = true
     }
@@ -48,8 +52,8 @@ chaquopy {
         buildPython(System.getenv("PYTHON38_PATH"))
         version = "3.8"
         pip {
-            install("numpy")
-            install("numba")
+            install("numpy==1.19.5")
+            install("numba==0.48.0")
             install("joblib==1.0.0")
             install("resampy==0.2.2")
             install("librosa==0.7.2")
@@ -73,7 +77,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
-    implementation("com.github.paramsen:noise:2.0.0")
-    implementation("com.github.wendykierp:JTransforms:3.1")
+    implementation(libs.ffmpeg.kit.audio)
+    implementation(libs.okhttp)
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
