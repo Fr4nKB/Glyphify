@@ -7,6 +7,7 @@
 - **Personalized Glyph ringtone**: choose any audio/song that you like and convert it to a Glyph ringtone!
 - **Working Glyph preview** in Nothing Composer App and system settings
 - **Same song, different Glyph ringtone**: if you convert the same song twice you'll get two different Glyph ringtone, choose which one you like the most!
+- **Support for all 33 zones of Phone(2)**
 
 ## Compatibility
 The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
