@@ -1,7 +1,10 @@
 package com.frank.glyphify
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -14,23 +17,22 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
-import com.frank.glyphify.databinding.ActivityMainBinding
-import com.frank.glyphify.glyph.Glyphifier
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import com.frank.glyphify.Constants.CHANNEL_ID
 import com.frank.glyphify.Constants.PHONE1_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2_MODEL_ID
+import com.frank.glyphify.databinding.ActivityMainBinding
+import com.frank.glyphify.glyph.batteryindicator.PowerConnectionReceiver
 import com.frank.glyphify.ui.dialogs.Dialog.supportMe
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var powerConnectionReceiver: PowerConnectionReceiver
 
     private fun setComposerAppVersion(): String {
         val manufacturer = Build.MANUFACTURER
@@ -106,6 +108,15 @@ class MainActivity : AppCompatActivity() {
         setComposerAppVersion()
         createNotificationChannel()
 
+        if(Build.MODEL == PHONE2A_MODEL_ID) {
+            powerConnectionReceiver = PowerConnectionReceiver()
+            val filter = IntentFilter().apply {
+                addAction(Intent.ACTION_POWER_CONNECTED)
+                addAction(Intent.ACTION_POWER_DISCONNECTED)
+            }
+            registerReceiver(powerConnectionReceiver, filter)
+        }
+
         val singleWorkReq = OneTimeWorkRequestBuilder<AppUpdater>()
             .build()
         WorkManager.getInstance(this).enqueue(singleWorkReq)
@@ -115,6 +126,13 @@ class MainActivity : AppCompatActivity() {
         WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
         welcomeMsg()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if(Build.MODEL == PHONE2A_MODEL_ID) {
+            unregisterReceiver(powerConnectionReceiver);
+        }
     }
 
 }

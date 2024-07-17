@@ -1,7 +1,9 @@
 package com.frank.glyphify.glyph
 
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Base64
 import android.webkit.MimeTypeMap
 import com.arthenica.ffmpegkit.FFprobeKit
@@ -11,6 +13,27 @@ import java.util.Locale
 import java.util.zip.Deflater
 
 object FileHandling {
+    fun getFileNameFromUri(context: Context, uri: Uri): String {
+        val cursor = context.contentResolver.query(uri, null, null, null, null, null)
+        var filename = ""
+
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                val filenameColumnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if(filenameColumnIndex != -1){
+                    filename = cursor.getString(filenameColumnIndex)
+                }
+                cursor.close()
+                return filename
+            }
+        }
+        catch (e: Exception) {
+            return filename
+        }
+
+        return filename
+    }
+
     fun getFileExtension(uri: Uri, contentResolver: ContentResolver): String {
         var extension: String? = null
 
@@ -56,12 +79,12 @@ object FileHandling {
     /**
      * Compress data using zlib and then encodes it in base64
      * @param data: the data to work on
-     * @return a string containing the base64 representation of the compresse data
+     * @return a string containing the base64 representation of the compresses data
      * */
     fun compressAndEncode(data: String): String {
         val input = data.toByteArray(Charsets.UTF_8)
 
-        // Compress the bytes
+        // compress the bytes
         val deflater = Deflater(Deflater.BEST_COMPRESSION)
         deflater.setInput(input)
         deflater.finish()
@@ -75,13 +98,13 @@ object FileHandling {
         outputStream.close()
         val compressedBytes = outputStream.toByteArray()
 
-        // Encode to Base64
+        // encode to Base64
         var base64Data = Base64.encodeToString(compressedBytes, Base64.DEFAULT)
 
-        // Remove padding bytes
+        // remove padding bytes
         base64Data = base64Data.trimEnd('=')
 
-        // Add newline every 76 characters
+        // add newline every 76 characters
         val formattedData = base64Data.chunked(76).joinToString("\n")
 
         return "$formattedData\n"

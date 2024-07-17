@@ -13,7 +13,7 @@ android {
         minSdk = 34
         targetSdk = 34
         versionCode = 1
-        versionName = "1.3.1"
+        versionName = "1.3.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
@@ -79,5 +79,6 @@ dependencies {
 
     implementation(libs.ffmpeg.kit.audio)
     implementation(libs.okhttp)
+    implementation(libs.smile.core)
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }

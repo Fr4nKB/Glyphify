@@ -17,7 +17,7 @@ object BeatDetector {
      * */
     fun detectBeatsAndFrequencies(context: Context, filepath: String, filename: String):
             Pair<List<Double>, List<List<Pair<Int, Double>>>> {
-        // this method uses Chaquopy to execute python code and the librosa which is a python library
+        // this method uses Chaquopy to execute python code and librosa which is a python library
         // that let us extract beats from a tune
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(context))
@@ -30,7 +30,7 @@ object BeatDetector {
 
         val tempos = listOf(result.asList()[0].toDouble(), result.asList()[1].toDouble())
 
-        val allBeats: MutableList<MutableList<Pair<Int, Double>>> = mutableListOf()
+        val rawBeats: MutableList<MutableList<Pair<Int, Double>>> = mutableListOf()
 
         for (band in result.asList()[2].asList()) {
             val beatsBand: MutableList<Pair<Int, Double>> = mutableListOf()
@@ -39,9 +39,9 @@ object BeatDetector {
                 val energy = beat.asList()[1].toDouble()
                 beatsBand.add(Pair(time, energy))
             }
-            allBeats.add(beatsBand)
+            rawBeats.add(beatsBand)
         }
 
-        return Pair(tempos, allBeats)
+        return Pair(tempos, rawBeats)
     }
 }

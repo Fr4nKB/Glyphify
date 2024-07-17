@@ -3,6 +3,7 @@ package com.frank.glyphify.ui.home
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
@@ -11,11 +12,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -26,10 +26,12 @@ import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
 import com.frank.glyphify.databinding.FragmentHomeBinding
+import com.frank.glyphify.glyph.FileHandling.getFileNameFromUri
 import com.frank.glyphify.glyph.Glyphifier
 import com.frank.glyphify.ui.dialogs.Dialog
 import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlin.random.Random
 
 
@@ -51,6 +53,81 @@ class HomeFragment : Fragment() {
                 R.id.negativeButton to { }
             )
         )
+    }
+
+    private fun glyphifySong(selectedFileUri: Uri) {
+        showNameDialog(requireContext()) { name ->
+
+            val glyphifyBtn = requireView().findViewById<MaterialButton>(R.id.btn_glyphify)
+            glyphifyBtn.isEnabled = false
+
+            val linLayoutProgress = requireView().findViewById<LinearLayout>(R.id.lin_layout_progress)
+            linLayoutProgress.visibility = View.VISIBLE
+
+            val selectFileButton = requireView().findViewById<MaterialButton>(R.id.btn_select_file)
+            selectFileButton.isEnabled = false // disable the button
+
+            val expandedToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.expanded_toggle)
+            expandedToggle.isEnabled = false
+
+            val data = Data.Builder()
+                .putString("uri", selectedFileUri.toString())
+                .putBoolean("expanded", expandedToggle.checkedButtonId == R.id.expanded_toggle_33)
+                .putString("outputName", name)
+                .build()
+
+            val workReq = OneTimeWorkRequestBuilder<Glyphifier>()
+                .setInputData(data)
+                .build()
+
+            // listen for progress updates
+            WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workReq.id)
+                .observe(this, Observer { workInfo ->
+                    if (workInfo != null) {
+                        val progress = workInfo.progress.getInt("PROGRESS", 0)
+
+                        val progressBar = requireView().findViewById<ProgressBar>(R.id.progress_bar)
+                        progressBar.progress = progress
+
+                        val textView = requireView().findViewById<TextView>(R.id.text_progress)
+
+                        when {
+                            progress <= 35 -> {
+                                textView.text = requireContext().getString(R.string.progress_text_1)
+                            }
+                            progress in 36..80 -> {
+                                textView.text = requireContext().getString(R.string.progress_text_2)
+                            }
+                            progress in 81..100 -> {
+                                textView.text = requireContext().getString(R.string.progress_text_3)
+                            }
+                        }
+
+                        if (workInfo.state.isFinished) {    // re-enable and show everything
+                            selectFileButton.isEnabled = true
+                            selectFileButton.text = getString(R.string.btn_file_selection)
+                            selectFileButton.backgroundTintList =
+                                ContextCompat.getColorStateList(requireContext(), R.color.black_russian);
+
+                            expandedToggle.isEnabled = true
+
+                            linLayoutProgress.visibility = View.GONE
+
+                            glyphifyBtn.visibility = View.GONE
+                            glyphifyBtn.isEnabled = true
+
+                            //  randomly show support dialog
+                            val randomNumber = Random.nextInt(0, 5)
+                            if(randomNumber == 2) {
+                                val permHandler = PermissionHandling(requireActivity())
+                                supportMe(requireContext(), permHandler)
+                            }
+                        }
+                    }
+                })
+
+            WorkManager.getInstance(requireContext()).enqueue(workReq)
+        }
     }
 
     override fun onCreateView(
@@ -75,12 +152,14 @@ class HomeFragment : Fragment() {
             )
         }
 
-        requireView().findViewById<MaterialButton>(R.id.select_file).setOnClickListener {
+        requireView().findViewById<MaterialButton>(R.id.btn_select_file).setOnClickListener {
             val intent = Intent()
                 .setType("audio/*")
                 .setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select a file"), 10)
         }
+
+
 
         // color the progress bar in red and make it visible
         val progressBar = requireView().findViewById<ProgressBar>(R.id.progress_bar)
@@ -93,7 +172,21 @@ class HomeFragment : Fragment() {
         );
 
         if(Build.MODEL == PHONE2_MODEL_ID) {
-            requireView().findViewById<LinearLayout>(R.id.expanded_lin).visibility = View.VISIBLE
+            val expandedToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.expanded_toggle)
+
+            val sharedPref: SharedPreferences =
+                requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
+            val lastSelectionToggleId = sharedPref.getInt("toggleId", R.id.expanded_toggle_5)
+
+            expandedToggle.addOnButtonCheckedListener { _, checkedId, _ ->
+                val editor: SharedPreferences.Editor = sharedPref.edit()
+                editor.putInt("toggleId", checkedId)
+                editor.apply()
+            }
+
+            expandedToggle.check(lastSelectionToggleId)
+            expandedToggle.visibility = View.VISIBLE
+
         }
     }
 
@@ -106,48 +199,18 @@ class HomeFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == 10 && resultCode == RESULT_OK) {
-            val selectedFileUri = data?.data // The URI with the location of the file
+            val selectedFileUri = data?.data        // contains the Uri
+
             if (selectedFileUri != null) {
+                val filename = getFileNameFromUri(requireContext(), selectedFileUri)
+                val selectFileButton = requireView().findViewById<MaterialButton>(R.id.btn_select_file)
+                selectFileButton.text = filename    // set text to display file name
+                selectFileButton.backgroundTintList =
+                    ContextCompat.getColorStateList(requireContext(), R.color.red);
 
-                showNameDialog(requireContext()) { name ->
-                    val expanded = requireView().findViewById<CheckBox>(R.id.expanded_checkbox).isChecked
-                    val data = Data.Builder()
-                        .putString("uri", selectedFileUri.toString())
-                        .putBoolean("expanded", expanded)
-                        .putString("outputName", name)
-                        .build()
-
-                    val workReq = OneTimeWorkRequestBuilder<Glyphifier>()
-                        .setInputData(data)
-                        .build()
-
-                    val selectFileButton = requireView().findViewById<MaterialButton>(R.id.select_file)
-                    selectFileButton.isEnabled = false // Disable the button
-
-                    val progressBar = requireView().findViewById<ProgressBar>(R.id.progress_bar)
-                    progressBar.visibility = View.VISIBLE
-
-                    // Listen for progress updates
-                    WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workReq.id)
-                        .observe(this, Observer { workInfo ->
-                            if (workInfo != null) {
-                                val progress = workInfo.progress.getInt("PROGRESS", 0)
-                                progressBar.progress = progress
-                                if (workInfo.state.isFinished) {
-                                    progressBar.visibility = View.GONE
-                                    selectFileButton.isEnabled = true // Re-enable the button
-
-                                    val randomNumber = Random.nextInt(0, 3)
-                                    if(randomNumber == 2) {
-                                        val permHandler = PermissionHandling(requireActivity())
-                                        supportMe(requireContext(), permHandler)
-                                    }
-                                }
-                            }
-                        })
-
-                    WorkManager.getInstance(requireContext()).enqueue(workReq)
-                }
+                val glyphifyBtn = requireActivity().findViewById<MaterialButton>(R.id.btn_glyphify)
+                glyphifyBtn.setOnClickListener { glyphifySong(selectedFileUri) }
+                glyphifyBtn.visibility = View.VISIBLE
             }
         }
     }

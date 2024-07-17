@@ -17,6 +17,7 @@ import android.util.Log
 import com.frank.glyphify.Constants.CHANNEL_ID
 import com.frank.glyphify.R
 import com.nothing.ketchum.Common
+import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphManager
 
@@ -89,16 +90,15 @@ class BatteryIndicatorService : Service() {
                         if (shakeForce > shakeThreshold && currentTime - lastShakeTime > 3500) {
                             lastShakeTime = currentTime
 
-                            val batteryLevel = getBatteryPercentage(applicationContext)
-
                             val builder = mGM.glyphFrameBuilder
+                            val batteryLevel = getBatteryPercentage(applicationContext)
+                            val batteryIndicatorFrame = builder.buildChannel(Glyph.Code_23111.C_1).build()
 
-                            // for same reason the progression value doesn't work as expected
-                            // i had to rescale the battery percentage to make it make sense
-                            val batteryIndicatorFrame = builder.buildChannelC().build()
+                            // the progress value doesn't work as expected, rescaling the battery
+                            // percentage to make the glyph progression make sense
                             mGM.displayProgressAndToggle(
                                 batteryIndicatorFrame,
-                                (batteryLevel * 0.75).toInt(),
+                                (batteryLevel * 0.8).toInt(),
                                 false)
 
                             // all methods like buildPeriod etc don't seem to work, workaround

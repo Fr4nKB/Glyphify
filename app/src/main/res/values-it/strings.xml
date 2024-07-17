@@ -19,6 +19,11 @@
     <string name="msg_new_version">Una nuova versione è disponibile, premi per scaricare su GitHub</string>
     <string name="service_battery_indicator_title">Servizio per l\'indicatore di batteria Glyph per Phone(2a). Chiudi Glyphify se non desideri questa feature.</string>
     <string name="expanded_checkbox_desc">Usa tutte le 33 zone</string>
+    <string name="toggle_text_5zones">5 ZONE</string>
+    <string name="toggle_text_33zones">33 ZONE</string>
+    <string name="progress_text_1">Analizzando la tua canzone…</string>
+    <string name="progress_text_2">Creando animazioni uniche</string>
+    <string name="progress_text_3">Quasi fatto…</string>
 
     <string name="support_me">Benvenuto! Questa è un\'app gratis e senza pubblicità fatta da uno studente. Se trovi valore nel mio lavoro e vorresti dimostrare il tuo apprezzamento, valuta la possibilità di fare una donazione o di assegnare una stella alla mia repository GitHub. Qualsiasi supporto è apprezzato, grazie per aver letto!</string>
     <string name="support_paypal">Comprami un caffè</string>

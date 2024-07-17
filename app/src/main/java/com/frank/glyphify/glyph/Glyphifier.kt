@@ -18,19 +18,19 @@ import com.frank.glyphify.Constants.ALBUM_NAME
 import com.frank.glyphify.Constants.LEDS_PATTERN
 import com.frank.glyphify.Constants.LIGHT_DURATION_MS
 import com.frank.glyphify.Constants.MAX_LIGHT
-import com.frank.glyphify.Constants.PHONE1_MODEL_ID
-import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.glyph.FileHandling.compressAndEncode
 import com.frank.glyphify.glyph.FileHandling.getAudioDetails
 import com.frank.glyphify.glyph.FileHandling.getFileExtension
 import com.frank.glyphify.glyph.LightEffects.circusTent
 import com.frank.glyphify.glyph.LightEffects.expDecay
-import com.frank.glyphify.glyph.LightEffects.fastBlink
-import com.frank.glyphify.glyph.LightEffects.flickering
+import com.frank.glyphify.glyph.PatternFinder.clusterizeData
+import com.frank.glyphify.glyph.PatternFinder.findBestCombinationOfPatterns
+import com.frank.glyphify.glyph.PatternFinder.findPatterns
+import com.frank.glyphify.glyph.PatternFinder.light_anim_high_freq
+import com.frank.glyphify.glyph.PatternFinder.light_anim_low_freq
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.SortedMap
 import kotlin.random.Random
 
 
@@ -100,258 +100,292 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         }
     }
 
+
     /**
-     * Converts a 2D array of beats to a sorted map, grouping on the timestamp
-     * @param bandsBeats: 2D array of beats
-     * @return sorted map of beats grouped by timestamp
+     * Isolate beats that don't belong to a pattern and groups the others
+     * @param beats: beats array
+     * @return map with key "patterns" that contains all the found patterns and relative beats and
+     * with key "beats" for beats not belonging to any pattern
+     */
+    fun isolatePatterns(beats: List<Pair<Int, Int>>): Map<String, Any> {
+        val kmeansIndexes = clusterizeData(beats)
+        val pat = findPatterns(kmeansIndexes)
+        val res = findBestCombinationOfPatterns(kmeansIndexes, pat)
+
+        val optimalPatterns: MutableList<List<List<Pair<Int, Int>>>> = mutableListOf()
+        for (pattern in res) {
+            val len = pattern.first.size
+            val patternBeatList = mutableListOf<List<Pair<Int, Int>>>()
+            for (startingIndex in pattern.second) {
+                patternBeatList.add(beats.slice(startingIndex until startingIndex + len))
+            }
+            optimalPatterns.add(patternBeatList)
+        }
+
+        // every other beat is treated as stand alone
+        val otherBeats = beats.filter { beat -> !optimalPatterns.any { pattern -> pattern.flatten().contains(beat) } }
+
+        return mapOf("patterns" to optimalPatterns, "beats" to otherBeats)
+    }
+
+    /**
+     * Parses an animation string
+     * @param animation: animation string
+     * @return a list of lists, each list contains the zones to use
      * */
-    private fun beats2Map(bandsBeats: List<List<Pair<Int, Double>>>): SortedMap<Int, List<Int>> {
-        val normalizedBandsBeats = bandsBeats.map { normalizeBeats(it) }
+    private fun parseAnimationString(animation: String): List<List<Int>> {
+        return animation.split("-").map { subElement ->
+            when {
+                subElement.contains("_") -> subElement.split("_").map { it.toInt() }
+                subElement.contains(".") -> {
+                    val range = subElement.split(".").map { it.toInt() }
+                    (range[0]..range[1]).toList()
+                }
+                else -> listOf(subElement.toInt())
+            }
+        }
+    }
 
-        Log.d("DEBUG", normalizedBandsBeats[3].toString())
+    /**
+     * Given a list of beats and a list of zones to use, it creates a new array with as many elements
+     * as "numZones" and populates the specified zones with the light intensity specified by the
+     * current beat, the other zones are left to value 0
+     * @param beats: beats list
+     * @param rndZone: list of zones to populate
+     * @return the same beats list but expanded to use all specified zones
+     * */
+    fun processBeats(beats: List<Pair<Int, Int>>, rndZone: List<Int>): List<Pair<Int, List<Int>>> {
+        return beats.map { pair ->
+            val (timestamp, lightIntensity) = pair
+            val newList = MutableList(numZones) { 0 }
 
-        val bandBeatsMap = mutableMapOf<Int, MutableList<Int>>()
-        for ((bandNum, beats) in normalizedBandsBeats.withIndex()) {
-            for ((timestamp, lightIntensity) in beats) {
-                if (timestamp !in bandBeatsMap) {
-                    bandBeatsMap[timestamp] = MutableList(numZones) { if (it == bandNum) lightIntensity else 0 }
+            for (zones in rndZone) {
+                newList[zones] = lightIntensity
+            }
+
+            Pair(timestamp, newList)
+        }
+    }
+
+    /**
+     * Adapts the fade out offset based on the chosen zone and the random choice for the light effect
+     * @param zone: selected zone
+     * @param effectChoice: random boolean use to chose the light effect
+     * @return adjusted fade out offset
+     * */
+    private fun getFadeOutOffsetBasedOnZone(zone: Int, effectChoice: Boolean): Int {
+        var fadeOutOffset = 0
+        when(zone) {
+            2 -> {
+                if (numZones == 5) {
+                    fadeOutOffset = 4
+                }
+            }
+
+            3 -> {
+                if (numZones == 11) {
+                    fadeOutOffset = 4
+                }
+            }
+
+            4 -> {
+                if (numZones == 5) {
+                    if (effectChoice) fadeOutOffset = 3
+                }
+                else if (numZones == 11) {
+                    fadeOutOffset = 4
+                }
+            }
+
+            in 5..8 -> {
+                fadeOutOffset = 4
+            }
+
+            10 -> {
+                if (effectChoice) fadeOutOffset = 3
+            }
+        }
+
+        return fadeOutOffset
+    }
+
+    /**
+     * Applies a light effect to a beat, it uses the selected zone and random choice of light effect
+     * to find the best fade out offset while also adjusting the tempo if it's too fast and thus
+     * avoid light flickering
+     * @param beat
+     * @param tempo: tempo of the freq band from which the beat was originated
+     * @param zone: selected zone
+     * @param effectChoice: random boolean use to chose the light effect
+     * @return list of beats representing the light effect
+     * */
+    private fun getBeatWithEffectBasedOnSpeedAndZone(beat: Pair<Int, Int>, tempo: Double,
+                                                     zone: Int, effectChoice: Boolean):
+            List<Pair<Int, Int>> {
+
+        var fadeOutOffset = getFadeOutOffsetBasedOnZone(zone, effectChoice)
+
+        val adjustedTempo = if(tempo > 125.0) tempo / 2 else tempo
+        val beatsSpeed = if(adjustedTempo > 100.0) 1 else 0
+
+        var beatWithEffect: List<Pair<Int, Int>> = emptyList()
+        when(beatsSpeed) {
+            0 -> {
+                beatWithEffect = if(effectChoice) expDecay(beat, adjustedTempo, fadeOutOffset)
+                else circusTent(beat, adjustedTempo, fadeOutOffset)
+            }
+            1 -> {
+                fadeOutOffset = (fadeOutOffset - 2).coerceAtLeast(0)
+                beatWithEffect = if(effectChoice) expDecay(beat, adjustedTempo, fadeOutOffset)
+                else circusTent(beat, adjustedTempo, fadeOutOffset)
+            }
+        }
+
+        return beatWithEffect
+    }
+
+    /**
+     * Merges beats together by finding the conflicting beats (same timestamp) and for each zone
+     * selecting the highest value
+     * @param beats: redundant beats list
+     * @return merged and chronologically sorted beats list
+     * */
+    fun mergePairs(beats: List<Pair<Int, List<Int>>>): List<Pair<Int, List<Int>>> {
+        return beats.groupBy { it.first }
+            .map { (timestamp, pairList) ->
+                val mergedList = pairList
+                    .reduce { acc, pair ->
+                        Pair(acc.first, acc.second.zip(pair.second) { a, b -> maxOf(a, b) })
+                    }.second
+                timestamp to mergedList
+            }
+            .sortedBy { it.first }
+    }
+
+    /**
+     * Performs the separation of beats into patterns and normal beats, adds light effect in a random
+     * zone for normal beats and applies a random animation for patterns, finally it merges
+     * everything together
+     * @param bandsBeats: list of beats in low freq and high freq
+     * @param tempos: list of tempos in low freq and high freq
+     * @return raw author tag data to be encoded
+     * */
+    private fun separatePatterns(bandsBeats: List<List<Pair<Int, Int>>>, tempos: List<Double>):
+            List<Pair<Int, List<Int>>> {
+        val tmp: MutableList<Pair<Int, List<Int>>> = mutableListOf()
+        val maxAnimationUsageTimes = 3
+
+        for ((index, bandBeats) in bandsBeats.withIndex()) {
+            val separatedBeats = isolatePatterns(bandBeats)
+            var beatWithEffect: List<Pair<Int, Int>>
+            val tempo = tempos[index]
+
+            val normalBeats = separatedBeats["beats"] as List<Pair<Int,Int>>
+            for (beat in normalBeats) {
+
+                val effectChoice = Random.nextBoolean()
+
+                val list = listOf(0,1,3,4)
+                var rndZone5 = if(index == 0) 2 else list.random()
+
+                var rndZone = listOf(rndZone5)
+                if(numZones == 11) {
+                    when(rndZone5) {
+                        0 -> rndZone = listOf(0,1)
+                        1 -> rndZone = listOf(2)
+                        2 -> rndZone = listOf(3,4,5,6,7,8)
+                        3 -> rndZone = listOf(9)
+                        4 -> rndZone = listOf(10)
+                    }
+                }
+
+                beatWithEffect = getBeatWithEffectBasedOnSpeedAndZone(beat, tempo, rndZone5, effectChoice)
+
+                tmp.addAll(processBeats(beatWithEffect, rndZone))
+
+            }
+
+            val patterns = separatedBeats["patterns"] as List<List<List<Pair<Int, Int>>>>
+            for(p in patterns) {
+                Log.d("DEBUG", "----")
+                for(a in p) {
+                    Log.d("DEBUG", a.toString())
+                }
+            }
+            for (pattern in patterns) {
+                val patternLen = pattern[0].size
+                val key = "$numZones.$patternLen"
+
+                var listAnimations: List<String>?
+                if(index == 0) {
+                    listAnimations = light_anim_low_freq[key]
                 }
                 else {
-                    bandBeatsMap[timestamp]?.set(bandNum, lightIntensity)
+                    listAnimations = light_anim_high_freq[key]
+                }
+
+                val patternNumRep = (pattern.size / maxAnimationUsageTimes) + 1
+                Log.d("DEBUG", pattern.size.toString() +" "+patternNumRep.toString())
+                var animation: MutableList<List<List<Int>>> = mutableListOf()
+
+                for (i in 1..patternNumRep) {
+                    Log.d("DEBUG", i.toString())
+                    val animationStr = listAnimations?.random()
+                    if(animationStr != null) {
+                        animation.add(parseAnimationString(animationStr))
+                    }
+                    else animation.add(emptyList())
+                }
+
+                Log.d("DEBUG", "---")
+                for ((i, patternRep) in pattern.withIndex()) {
+                    Log.d("DEBUG", i.toString())
+                    for ((j, beat) in patternRep.withIndex()) {
+                        val effectChoice = Random.nextBoolean()
+                        beatWithEffect = getBeatWithEffectBasedOnSpeedAndZone(beat, tempo, 2, effectChoice)
+                        tmp.addAll(processBeats(beatWithEffect, animation[i/maxAnimationUsageTimes][j]))
+                    }
                 }
             }
         }
 
-        return bandBeatsMap.toSortedMap()
+        return mergePairs(tmp)
     }
 
-    /**
-     * Randomizes which zone is used to represent high frequencies for a given beat
-     * @param bandsBeatsMap: beats map grouped by timestamp
-     * @return randomized beats map grouped by timestamp
-     * */
-    private fun randomizeLightEffectPosition(bandsBeatsMap: Map<Int, List<Int>>): MutableMap<Int, MutableList<Int>> {
-        val randomizedBeats = mutableMapOf<Int, MutableList<Int>>()
-        val highBeatIndices = listOf(0, 1, 3)
-        val lowBeatIndices = listOf(2, 4)
-
-        for ((timestamp, lightIntensities) in bandsBeatsMap) {
-            //randomize high and low beats
-            val shuffledList = lightIntensities.toMutableList()
-            shuffledList.shuffle(Random)
-
-            // encode to what frequency band (high or low) this beat belongs
-            val isLowBeat = !(highBeatIndices.all { lightIntensities[it] == 0 }
-                    && lowBeatIndices.any { lightIntensities[it] > 0 })
-            val isHighBeat = lowBeatIndices.all { lightIntensities[it] == 0 }
-                    && highBeatIndices.any { lightIntensities[it] > 0 }
-
-            // if both frequencies are present, categorize as high beat
-            val beatType = if (isLowBeat || isHighBeat) 1 else 0
-            shuffledList.add(shuffledList.size, beatType)
-
-            randomizedBeats[timestamp] = shuffledList
-        }
-
-        return randomizedBeats
-    }
 
     /**
      * Expand the beats to work on the 33 zones of Phone(2)
      * @param beatsToExpand: beats map grouped by timestamp
      * @return expanded beats
      * */
-    private fun expandZones(beatsToExpand: Map<Int, List<Int>>, newNumZones: Int):
-            MutableMap<Int, MutableList<Int>> {
-        val expandedZones = mutableMapOf<Int, MutableList<Int>>()
+    private fun expandZones(beatsToExpand: List<Pair<Int, List<Int>>>):
+            List<Pair<Int, List<Int>>> {
+        val expandedZones: MutableList<Pair<Int, List<Int>>> = mutableListOf()
 
-        if(newNumZones == 11) {
-            for ((timestamp, lightIntensities) in beatsToExpand) {
+        for ((timestamp, lightIntensities) in beatsToExpand) {
+            var expandedList = lightIntensities.toMutableList()
 
-                var expandedList = MutableList(newNumZones + 1) { 0 }
+            // fetch elements to expand
+            val element3 = lightIntensities[3]
+            val element9 = lightIntensities[9]
 
-                for ((index, lightIntesity) in lightIntensities.withIndex()) {
-                    when(index){
-                        0 -> {  // expand zone 0 to use one or both subzones
-                            val choice = Random.nextInt(0, 3)
-                            if (choice == 2) {
-                                expandedList[0] = lightIntesity
-                                expandedList[1] = lightIntesity
-                            }
-                            else {
-                                expandedList[choice] = lightIntesity
-                            }
-                        }
-                        1 -> {
-                            expandedList[2] = lightIntesity
-                        }
-                        2 -> {
-                            // zone 2 can use only one subzone, two diagonal subzones, triangular subzones
-                            // or as a whole
-                            val choice = Random.nextInt(0, 4)
-
-                            when(choice) {
-                                0 -> {
-                                    val subZoneIndex = Random.nextInt(0, 6)
-                                    expandedList[subZoneIndex + 3] = lightIntesity
-                                }
-                                1 -> {
-                                    val subZoneIndex = Random.nextInt(0, 3)
-                                    expandedList[subZoneIndex + 3] = lightIntesity
-                                    expandedList[subZoneIndex + 6] = lightIntesity
-                                }
-                                2 -> {
-                                    val subZoneIndex = Random.nextInt(0, 2)
-                                    expandedList[subZoneIndex + 3] = lightIntesity
-                                    expandedList[subZoneIndex + 5] = lightIntesity
-                                    expandedList[subZoneIndex + 7] = lightIntesity
-                                }
-                                3 -> {
-                                    for(j in 3..6) {
-                                        expandedList[j] = lightIntesity
-                                    }
-                                }
-                            }
-                        }
-                        else -> {
-                            expandedList[index + 6] = lightIntesity
-                        }
-                    }
-                    expandedZones[timestamp] = expandedList
-                }
-            }
-        }
-
-        else if (newNumZones == 33) {
-            for ((timestamp, lightIntensities) in beatsToExpand) {
-                var expandedList = lightIntensities.toMutableList()
-
-                // fetch elements to expand
-                val element3 = lightIntensities[3]
-                val element9 = lightIntensities[9]
-
-                // insert 15 copies of element 3 between elements 3 and 4
-                for (i in 0 until 15) {
-                    expandedList.add(4, element3)
-                }
-
-                // adjust the index for element 9 after the previous insertions
-                val newElement9Index = 9 + 15
-
-                // insert 7 copies of element 9 between elements 9 and 10
-                for (i in 0 until 7) {
-                    expandedList.add(newElement9Index + 1, element9)
-                }
-
-                expandedZones[timestamp] = expandedList
+            // insert 15 copies of element 3 between elements 3 and 4
+            for (i in 0 until 15) {
+                expandedList.add(4, element3)
             }
 
+            // adjust the index for element 9 after the previous insertions
+            val newElement9Index = 9 + 15
+
+            // insert 7 copies of element 9 between elements 9 and 10
+            for (i in 0 until 7) {
+                expandedList.add(newElement9Index + 1, element9)
+            }
+
+            expandedZones.add(Pair(timestamp, expandedList))
         }
 
         return expandedZones
-    }
-
-    /**
-     * Add a randomized light effect to each zone in each time slot
-     * @param bandsBeatsMap: beats map grouped by timestamp
-     * @return beats map grouped by timestamp with random effects
-     * */
-    private fun addBeatsEffects(bandsBeatsList: MutableMap<Int, MutableList<Int>>, tempos: List<Double>):
-            MutableMap<Int, MutableList<Int>> {
-
-        val toZones = mutableMapOf<Int, MutableList<Triple<Int, Int, Int>>>()
-
-        // first group beats into zones
-        for ((key, values) in bandsBeatsList) {
-            for ((index, value) in values.withIndex()) {
-                if(value != 0 && index < numZones) {
-                    if (index !in toZones) {
-                        toZones[index] = MutableList(1) { Triple<Int, Int, Int>(key, value, values[numZones]) }
-                    }
-                    else {
-                        toZones[index]?.add(Triple<Int, Int, Int>(key, value, values[numZones]))
-                    }
-                }
-            }
-        }
-
-        val fadedBeats = mutableMapOf<Int, MutableList<Int>>()
-
-        // then apply effects for each pair of (timestamp, light)
-        for ((zone, beats) in toZones) {
-            val tmp: MutableList<Pair<Int, Int>> = mutableListOf()
-
-            for (beat in beats) {
-                var beatWithEffect: List<Pair<Int, Int>> = emptyList()
-
-                val effectChoice = Random.nextBoolean()
-
-                // these values have been fine tuned across multiple tries
-                when(zone) {
-                    0 -> {
-                        beatWithEffect = if(effectChoice) expDecay(beat, tempos)
-                        else circusTent(beat, tempos)
-                    }
-                    1 -> {
-                        beatWithEffect = if(effectChoice) expDecay(beat, tempos)
-                        else circusTent(beat, tempos)
-                    }
-                    2 -> {
-                        if(numZones == 5) {
-                            beatWithEffect = if(effectChoice) expDecay(beat, tempos, 4)
-                            else circusTent(beat, tempos, 4)
-                        }
-                        else if(numZones == 11) {
-                            beatWithEffect = if(effectChoice) expDecay(beat, tempos)
-                            else circusTent(beat, tempos)
-                        }
-                    }
-                    3 -> {
-                        if(numZones == 5) {
-                            beatWithEffect = if(effectChoice) expDecay(beat, tempos)
-                            else circusTent(beat, tempos)
-                        }
-                        else if(numZones == 11) {
-                            beatWithEffect = if(effectChoice) expDecay(beat, tempos, 4)
-                            else circusTent(beat, tempos, 4)
-                        }
-                    }
-                    4 -> {
-                        if(numZones == 5) {
-                            beatWithEffect = if(effectChoice) flickering(beat, tempos, 3)
-                            else fastBlink(beat, tempos)
-                        }
-                        else if(numZones == 11) {
-                            beatWithEffect = if(effectChoice) expDecay(beat, tempos, 4)
-                            else circusTent(beat, tempos, 4)
-                        }
-                    }
-                    in 5..8 -> {
-                        beatWithEffect = if(effectChoice) expDecay(beat, tempos, 4)
-                        else circusTent(beat, tempos, 4)
-                    }
-                    9 -> {
-                        beatWithEffect = if(effectChoice) expDecay(beat, tempos)
-                        else circusTent(beat, tempos)
-                    }
-                    10 -> {
-                        beatWithEffect = if(effectChoice) flickering(beat, tempos, 3)
-                        else fastBlink(beat, tempos)
-                    }
-                }
-                tmp.addAll(beatWithEffect)
-            }
-
-            for ((timestamp, lightIntensity) in tmp) {
-                fadedBeats.getOrPut(timestamp) { MutableList(numZones) { 0 } }.apply {
-                    // if some light intensity data is overlapping chose the bigger one
-                    this[zone] = if(lightIntensity > this[zone]) lightIntensity else this[zone]
-                    this[zone] = if(this[zone] > MAX_LIGHT) MAX_LIGHT else this[zone]
-                }
-            }
-        }
-
-        return fadedBeats.toSortedMap()
     }
 
     /**
@@ -395,23 +429,21 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
      * @param sampleRate: sample rate of the audio to be set as ringtone
      * @return the compressed and encoded data for the Glyph show
      * */
-    private fun buildAuthorTag(data: MutableMap<Int, MutableList<Int>>): String {
-        val keys = data.keys.toList()
+    private fun buildAuthorTag(data: List<Pair<Int, List<Int>>>): String {
 
-        val result = mutableListOf<MutableList<Int>>()
+        val result = mutableListOf<List<Int>>()
 
         var currentTs = 0
 
-        for (i in keys.indices) {
-            val nextTs = keys[i]
+        for (beats in data) {
+            val nextTs = beats.first
 
             val numEmpty = (nextTs - currentTs) / 16 - 1
             if (numEmpty > 0) {
                 result.addAll(List(numEmpty) { MutableList(numZones) { 0 } })
             }
 
-            var currentData = data[nextTs]!!
-            result.add(currentData)
+            result.add(beats.second)
 
             currentTs = nextTs
         }
@@ -542,29 +574,20 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         val rawBeats = BeatDetector.detectBeatsAndFrequencies(context, path, "temp.wav")
         setProgressAsync(workDataOf("PROGRESS" to 30))
 
-        val normalizedBeats = beats2Map(rawBeats.second)
-        setProgressAsync(workDataOf("PROGRESS" to 40))
+        val normalizedBandsBeats = rawBeats.second.map { normalizeBeats(it) }
+        setProgressAsync(workDataOf("PROGRESS" to 35))
 
-        var randomizedBeats = randomizeLightEffectPosition(normalizedBeats)
-        setProgressAsync(workDataOf("PROGRESS" to 50))
-
-
-        if(expanded) {        // if device is Phone(2) first expand to 11 zones
-            numZones = 11
-            randomizedBeats = expandZones(randomizedBeats, 11)
-            setProgressAsync(workDataOf("PROGRESS" to 60))
-        }
-
-        var fadedBeats = addBeatsEffects(randomizedBeats, rawBeats.first)
+        if(expanded) numZones = 11
+        var animatedBeats = separatePatterns(normalizedBandsBeats, rawBeats.first)
         setProgressAsync(workDataOf("PROGRESS" to 70))
 
-        if(expanded) {      // finally, if device is Phone(2), expand to 33 zones
+        if(expanded) {      // if device is Phone(2), expand to 33 zones
+            animatedBeats = expandZones(animatedBeats)
             numZones = 33
-            fadedBeats = expandZones(fadedBeats, 33)
             setProgressAsync(workDataOf("PROGRESS" to 75))
         }
 
-        val authorTag = buildAuthorTag(fadedBeats)
+        val authorTag = buildAuthorTag(animatedBeats)
         if (authorTag == "") return Result.failure()
 
         setProgressAsync(workDataOf("PROGRESS" to 80))

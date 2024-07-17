@@ -13,12 +13,12 @@ object LightEffects {
     }
 
 
-    fun expDecay(beat: Triple<Int, Int, Int>, tempos: List<Double>, offsetSlotsOut: Int = 0):
+    fun expDecay(beat: Pair<Int, Int>, tempo: Double, offsetSlotsOut: Int = 0):
             List<Pair<Int, Int>> {
-        var (timestamp, lightIntensity, type) = beat
+        var (timestamp, lightIntensity) = beat
         val result = mutableListOf<Pair<Int, Int>>()
 
-        val slotsOut = calculateBase(tempos[type], 23, 7.0/60, 4..16)
+        val slotsOut = calculateBase(tempo, 23, 7.0/60, 4..16)
 
         for (i in 2 downTo 1) {
             val newTs = if(timestamp - LIGHT_DURATION_MS * i < 0) 0 else timestamp - LIGHT_DURATION_MS * i
@@ -37,14 +37,14 @@ object LightEffects {
         return result
     }
 
-    fun fastBlink(beat: Triple<Int, Int, Int>, tempos: List<Double>, offsetSlotsOut: Int = 0):
+    fun fastBlink(beat: Pair<Int, Int>, tempo: Double, offsetSlotsOut: Int = 0):
             List<Pair<Int, Int>> {
-        var (timestamp, lightIntensity, type) = beat
+        var (timestamp, lightIntensity) = beat
         val result = mutableListOf<Pair<Int, Int>>()
 
         result.add(Pair(timestamp, lightIntensity))
 
-        val slotsOut = calculateBase(tempos[type], 11, 1.0/20, 4..8)
+        val slotsOut = calculateBase(tempo, 11, 1.0/20, 4..8)
 
         for (i in 1..slotsOut) {
             timestamp += LIGHT_DURATION_MS
@@ -55,9 +55,9 @@ object LightEffects {
         return result
     }
 
-    fun circusTent(beat: Triple<Int, Int, Int>, tempos: List<Double>, offsetSlotsIn: Int = 0):
+    fun circusTent(beat: Pair<Int, Int>, tempo: Double, offsetSlotsIn: Int = 0):
             List<Pair<Int, Int>> {
-        var (timestamp, lightIntensity, type) = beat
+        var (timestamp, lightIntensity) = beat
         val tmp = mutableListOf<Pair<Int, Int>>()
 
         fun calculateIntensity(i: Int, slots: Int): Int {
@@ -65,7 +65,7 @@ object LightEffects {
         }
 
 
-        val slotsIn = calculateBase(tempos[type], 14, 1.0/15, 4..10)
+        val slotsIn = calculateBase(tempo, 14, 1.0/15, 4..10)
 
         for (i in slotsIn downTo 1) {
             val newTs = if(timestamp - LIGHT_DURATION_MS * i < 0) 0 else timestamp - LIGHT_DURATION_MS * i
@@ -93,15 +93,15 @@ object LightEffects {
         return result
     }
 
-    fun flickering(beat: Triple<Int, Int, Int>, tempos: List<Double>, numFlickers: Int,
+    fun flickering(beat: Pair<Int, Int>, tempo: Double, numFlickers: Int,
                    offsetSlotsIn: Int = 0): List<Pair<Int, Int>> {
-        var (timestamp, lightIntensity, type) = beat
+        var (timestamp, lightIntensity) = beat
         val result = mutableListOf<Pair<Int, Int>>()
 
-        val slotsOut = calculateBase(tempos[type], 11, 1.0/20, 4..8)
+        val slotsOut = calculateBase(tempo, 11, 1.0/20, 4..8)
 
         for(i in 1..numFlickers) {
-            result.addAll(fastBlink(Triple(timestamp, lightIntensity, type), tempos))
+            result.addAll(fastBlink(Pair(timestamp, lightIntensity), tempo))
             timestamp += LIGHT_DURATION_MS * (slotsOut + 4)
         }
 

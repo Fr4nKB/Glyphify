@@ -74,7 +74,8 @@ class RingtonesFragment : Fragment() {
         var lastKnownPos = -1  // keep track of the last selected item
         init {
             // Filter out only .ogg files
-            files = files.filter { it.extension == "ogg" }.toTypedArray()
+            files = files.filter { it.extension == "ogg" }.sortedByDescending { it.lastModified() }
+                .toTypedArray()
         }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

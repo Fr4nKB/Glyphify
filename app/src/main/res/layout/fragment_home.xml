@@ -6,14 +6,51 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/expanded_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/btn_select_file"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:selectionRequired="true"
+        app:singleSelection="true"
+        app:layout_constraintVertical_bias="0.9"
+        app:checkedButton="@+id/expanded_toggle_5">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/expanded_toggle_5"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:text="@string/toggle_text_5zones"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:cornerRadius="25dp"
+            android:backgroundTint="@drawable/style_expanded_toggle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/expanded_toggle_33"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:text="@string/toggle_text_33zones"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:cornerRadius="25dp"
+            android:backgroundTint="@drawable/style_expanded_toggle" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/select_file"
+        android:id="@+id/btn_select_file"
         android:layout_width="200dp"
-        android:layout_height="100dp"
+        android:layout_height="90dp"
         android:layout_margin="10dp"
         android:contentDescription="@string/btn_desc_file_selection"
         android:text="@string/btn_file_selection"
-        android:textSize="14dp"
+        android:textSize="12sp"
         app:backgroundTint="@color/black_russian"
         app:cornerRadius="100dp"
         app:iconGravity="textStart"
@@ -21,47 +58,60 @@
         app:iconSize="90dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
+        app:layout_constraintVertical_bias="0.25" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_glyphify"
+        android:layout_width="200dp"
+        android:layout_height="90dp"
+        android:contentDescription="@string/btn_desc_file_selection"
+        android:text="GLYPHIFY"
+        android:visibility="gone"
+        android:textSize="12sp"
+        android:textColor="@color/black"
+        app:backgroundTint="@color/white"
+        app:cornerRadius="100dp"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="90dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_donate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_file"
+        app:layout_constraintVertical_bias="0.2" />
 
     <LinearLayout
-        android:id="@+id/expanded_lin"
+        android:id="@+id/lin_layout_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/progress_bar"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btn_donate"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/select_file">
+        app:layout_constraintTop_toBottomOf="@+id/btn_glyphify">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/expanded_checkbox_desc" />
-
-        <CheckBox
-            android:id="@+id/expanded_checkbox"
+            android:id="@+id/text_progress"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
+            android:indeterminate="false"
+            android:max="100" />
+
     </LinearLayout>
 
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="250dp"
-        android:layout_height="50dp"
-        android:indeterminate="false"
-        android:max="100"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/select_file"
-        app:layout_constraintVertical_bias="0.275" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_donate"
@@ -74,8 +124,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/select_file"
-        app:layout_constraintVertical_bias="0.7"
+        app:layout_constraintTop_toBottomOf="@+id/btn_select_file"
+        app:layout_constraintVertical_bias="0.9"
         app:tint="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
