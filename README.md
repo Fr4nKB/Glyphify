@@ -1,21 +1,24 @@
-# Glyphify
+# Glyphify: multipurpose Glyph app
 ## Introduction
-**Glyphify** is an **Android app made for Nothing Phones**, it **converts any song into a Glyph synched ringtone**.
+**Glyphify** is an **Android app made for Nothing Phones**, it **packs multiple features to make the Glyph interface more useful**:
 
-## Features
-- **Intuitive and Nothing - like UI**
-- **Personalized Glyph ringtone**: choose any audio/song that you like and convert it to a Glyph ringtone!
-- **Working Glyph preview** in Nothing Composer App and system settings
-- **Same song, different Glyph ringtone**: if you convert the same song twice you'll get two different Glyph ringtone, choose which one you like the most!
-- **Support for all 33 zones of Phone(2)**
+### Glyphifier
+It's an automatic composer, choose any song (.mp3, wav etc) and it will be converted into a Glyph synched ringtone with a better accuracy compared to the built-in Nothing algorithm. Phone(2) users can also enjoy all 33 zones addressing for their ringtones. Songs are also randomic, meaning that by using the same source file you will get a different ringtone each time, choose which one you like the most!
+
+<img src="https://github.com/user-attachments/assets/f5dd76a3-3f61-46a2-84b4-cacf0a0e8f10" height="500">
+<img src="https://github.com/user-attachments/assets/43a70dc2-ba5b-4b63-a173-6b4a4aeb447c" height="500">
+<img src="https://github.com/user-attachments/assets/f236b849-a82f-4c6f-92a6-a43fd93650d3" height="500">
+
+### Phone(2a)'s battery indicator
+A missing feature present on other Nothing phones it's back thanks to Glyphify
+
+### Extended Nothing Essential notifications
+why use only one Glyph as an Essential notification led? With Glyphify you can map any Glyph zone to any of your contact and also chose between two different light effect on a per zone basis: static and pulsing light
+
+<img src="https://github.com/user-attachments/assets/4a3f1ae3-9056-4c91-a92e-b56ebeb6cbd5" height="500">
 
 ## Compatibility
 The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
-
-## Gallery
-<img src="https://github.com/Fr4nKB/Glyphify/assets/70409297/18bd8c93-26a2-4406-91f6-72f0e661afca" height="500">
-<img src="https://github.com/Fr4nKB/Glyphify/assets/70409297/717faf02-2fb6-4b17-a830-7fdcf703c171" height="500">
-<img src="https://github.com/Fr4nKB/Glyphify/assets/70409297/ce6383ea-801d-4dae-b277-458439c64941" height="500">
 
 ## Top Donors
 
