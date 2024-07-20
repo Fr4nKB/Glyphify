@@ -21,6 +21,8 @@ Why use only one Glyph as an Essential notification LED? With Glyphify you can m
 
 <img src="https://github.com/user-attachments/assets/4a3f1ae3-9056-4c91-a92e-b56ebeb6cbd5" height="500">
 
+https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
+
 ## Compatibility
 The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
 
