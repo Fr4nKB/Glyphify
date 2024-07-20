@@ -14,10 +14,10 @@ class PermissionHandling(private val activity: Activity) {
     }
 
     /**shows alert dialog, if ok is pressed a set of permissions are requested otherwise the app is closed*/
-    private fun popUp(permissions: Array<String>, requestCode: Int) {
+    private fun popUp(permissions: Array<String>, layout: Int, requestCode: Int) {
         Dialog.showDialog(
             activity,
-            R.layout.dialog_perm_notifications,
+            layout,
             mapOf(
                 R.id.positiveButton to {
                     askPermissions(permissions, requestCode)
@@ -27,7 +27,7 @@ class PermissionHandling(private val activity: Activity) {
         )
     }
 
-    fun checkRequiredPermission(permissions: Array<String>): Boolean {
+    fun checkRequiredPermission(permissions: List<String>): Boolean {
         for (permission in permissions) {
             if (ContextCompat.checkSelfPermission(activity, permission)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -37,13 +37,9 @@ class PermissionHandling(private val activity: Activity) {
         return true
     }
 
-    fun askRequiredPermissions() {
-        val permissions = mutableListOf(
-            Manifest.permission.POST_NOTIFICATIONS
-        )
-
-        if (!checkRequiredPermission(permissions.toTypedArray())) {
-            popUp(permissions.toTypedArray(), 1)
+    fun askRequiredPermissions(permissions: List<String>, layout: Int) {
+        if (!checkRequiredPermission(permissions)) {
+            popUp(permissions.toTypedArray(), layout, 1)
         }
     }
 

@@ -8,7 +8,6 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,8 +25,8 @@ import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
 import com.frank.glyphify.databinding.FragmentHomeBinding
-import com.frank.glyphify.glyph.FileHandling.getFileNameFromUri
-import com.frank.glyphify.glyph.Glyphifier
+import com.frank.glyphify.glyph.composer.FileHandling.getFileNameFromUri
+import com.frank.glyphify.glyph.composer.Glyphifier
 import com.frank.glyphify.ui.dialogs.Dialog
 import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 import com.google.android.material.button.MaterialButton
@@ -171,17 +170,19 @@ class HomeFragment : Fragment() {
             )
         );
 
-        if(Build.MODEL == PHONE2_MODEL_ID) {
+        if(PHONE2_MODEL_ID.contains(Build.MODEL)) {
             val expandedToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.expanded_toggle)
 
             val sharedPref: SharedPreferences =
                 requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
             val lastSelectionToggleId = sharedPref.getInt("toggleId", R.id.expanded_toggle_5)
 
-            expandedToggle.addOnButtonCheckedListener { _, checkedId, _ ->
-                val editor: SharedPreferences.Editor = sharedPref.edit()
-                editor.putInt("toggleId", checkedId)
-                editor.apply()
+            expandedToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                if (isChecked) {
+                    val editor: SharedPreferences.Editor = sharedPref.edit()
+                    editor.putInt("toggleId", checkedId)
+                    editor.apply()
+                }
             }
 
             expandedToggle.check(lastSelectionToggleId)

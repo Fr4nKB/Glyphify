@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_notifications"
+        android:title="@string/title_notifications" />
+
+    <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_glyphifier"
         android:title="@string/title_home" />

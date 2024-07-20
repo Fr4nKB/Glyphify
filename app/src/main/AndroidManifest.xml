@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.frank.glyphify">
 
-    <!-- this permissions are needed to fetch the latest version of the app -->
+    <!-- these permissions are needed to fetch the latest version of the app -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -16,6 +17,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
+
+    <!-- permission to register contacts for a personalize persistent notification -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Nothing Glyph sdk permissions -->
     <uses-permission android:name="com.nothing.ketchum.permission.ENABLE"/>
@@ -45,7 +49,7 @@
 
         <!-- broadcast receiver for when the phone is connected/disconnected to power -->
         <receiver android:name=".glyph.batteryindicator.PowerConnectionReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
@@ -64,6 +68,20 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <service android:name=".glyph.notificationmanager.GlyphNotificationManagerService"
+            android:label="@string/app_name"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.notification.default_filter_types"
+                android:value="conversations|ongoing">
+            </meta-data>
+        </service>
 
     </application>
 

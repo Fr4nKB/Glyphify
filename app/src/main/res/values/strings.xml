@@ -2,24 +2,37 @@
     <string name="app_name">Glyphify</string>
     <string name="title_home">Glyphifier</string>
     <string name="title_ringtones">Ringtones</string>
+    <string name="title_notifications">Notifications</string>
+
     <string name="btn_file_selection">Select a file</string>
     <string name="btn_desc_file_selection">Select a file</string>
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop</string>
     <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
     <string name="btn_apply_ringtone">Apply ringtone</string>
+
     <string name="btn_share">Share</string>
     <string name="btn_delete">Delete</string>
     <string name="btn_donate">Donate</string>
+
     <string name="toast_ringtone_applied">Default ringtone applied</string>
     <string name="alert_msg_perm_settings">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
     <string name="alert_msg_perm_notifications">Allow notifications to be notified when a new update is published</string>
+    <string name="alert_msg_perm_contacts">Allow to read contacts in order to detect a notification from that contact</string>
+    <string name="alert_msg_perm_notifications_listener">This panel let\'s you chose any Glyph zone as a "Essential" notification: tap on a Glyph zone, select a contact and every time you get a notification from that contact the Glyph will stay on until you swipe or answer the notification. To do this you need to allow the app to read notifications and to read your contacts.</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Abort</string>
+
     <string name="title_new_version">Glyphify update</string>
     <string name="msg_new_version">A new version is available, tap to download on GitHub</string>
+
     <string name="service_battery_indicator_title">Glpyh battery indicator service for Phone(2a). Close Glyphify if you don\'t desire this feature.</string>
+    <string name="service_notification_manager_title">Personalized persistent Glyph notification service</string>
+
     <string name="expanded_checkbox_desc">Use all 33 zones</string>
     <string name="toggle_text_5zones">5 ZONES</string>
     <string name="toggle_text_33zones">33 ZONES</string>
+
     <string name="progress_text_1">Analysing your song…</string>
     <string name="progress_text_2">Creating unique animations</string>
     <string name="progress_text_3">Almost there…</string>

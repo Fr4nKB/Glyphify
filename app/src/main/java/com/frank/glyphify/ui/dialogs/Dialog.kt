@@ -1,5 +1,6 @@
 package com.frank.glyphify.ui.dialogs
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -24,7 +25,8 @@ object Dialog {
         buttonActions: Map<Int, (View) -> Unit>,
         isCancelable: Boolean = true,
         delayEnableButtonId: Int? = null,
-        delayMillis: Long = 0
+        delayMillis: Long = 0,
+        onDismiss: (() -> Unit)? = null  // Add this parameter
     ) {
         val dialogView = LayoutInflater.from(context).inflate(layoutId, null)
         val dialog = AlertDialog.Builder(context)
@@ -57,13 +59,15 @@ object Dialog {
             }, delayMillis)
         }
 
+        dialog.setOnDismissListener {  // Set the listener here
+            onDismiss?.invoke()
+        }
+
         dialog.show()
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
-
     fun supportMe(context: Context, permHandler: PermissionHandling) {
-
         showDialog(
             context,
             R.layout.first_boot,
@@ -72,23 +76,22 @@ object Dialog {
                     context.startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
-                        Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
+                            Uri.parse("https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL"))
                     )
                 },
-                R.id.githubBtn to {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                        Uri.parse("https://github.com/Fr4nKB/Glyphify"))
+                R.id.negativeButton to {
+                    val permissions = mutableListOf(
+                        Manifest.permission.POST_NOTIFICATIONS
                     )
-                },
-                R.id.negativeButton to { permHandler.askRequiredPermissions() }
+                    permHandler.askRequiredPermissions(permissions, R.layout.dialog_perm_notifications)
+                }
             ),
             isCancelable = false,
             delayEnableButtonId = R.id.negativeButton,
-            delayMillis = 10000
+            delayMillis = 10000,
+            onDismiss = {
+                // Ask for the permission here
+            }
         )
     }
-
-
 }

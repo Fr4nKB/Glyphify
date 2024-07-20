@@ -3,24 +3,37 @@
     <string name="app_name">Glyphify</string>
     <string name="title_home">Glyphifier</string>
     <string name="title_ringtones">Suonerie</string>
+    <string name="title_notifications">Notifiche</string>
+
     <string name="btn_file_selection">Seleziona un file</string>
     <string name="btn_desc_file_selection">Seleziona un file</string>
+    <string name="btn_start">Avvia</string>
+    <string name="btn_stop">Ferma</string>
     <string name="msg_alert_output_name">INSERISCI UN NOME PER LA SUONERIA</string>
     <string name="btn_apply_ringtone">Applica suoneria</string>
+
     <string name="btn_share">Condividi</string>
     <string name="btn_delete">Elimina</string>
     <string name="btn_donate">Dona</string>
+
     <string name="toast_ringtone_applied">Suoneria di default applicata</string>
     <string name="alert_msg_perm_settings">Questa app ha bisogno di cambiare le impostazioni di sistema per applicare la suoneria. Vuoi concedere il permesso?</string>
     <string name="alert_msg_perm_notifications">Consenti all\'app di inviarti notifiche per ricevere aggiornamenti</string>
+    <string name="alert_msg_perm_contacts">Consenti di leggere i contatti per rilevare una notifica da un contatto</string>
+    <string name="alert_msg_perm_notifications_listener">Questo pannello ti consente di selezionare una qualsiasi zona Glyph come notifica "Essential": premi su una zona glyph, seleziona un contatto e ogni volta che ricevi una notifica da quel contatto la zona selezionata rimarrà accesa finchè non fai swipe o tap sulla notifica. Per utilizzare questa funzionalità devi garantire il permesso per leggere notifiche e contatti.</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Annulla</string>
+
     <string name="title_new_version">Aggiornamento Glyphify</string>
     <string name="msg_new_version">Una nuova versione è disponibile, premi per scaricare su GitHub</string>
+
     <string name="service_battery_indicator_title">Servizio per l\'indicatore di batteria Glyph per Phone(2a). Chiudi Glyphify se non desideri questa feature.</string>
+    <string name="service_notification_manager_title">Servizio per le notifiche Glyph persistenti personalizzate</string>
+
     <string name="expanded_checkbox_desc">Usa tutte le 33 zone</string>
     <string name="toggle_text_5zones">5 ZONE</string>
     <string name="toggle_text_33zones">33 ZONE</string>
+
     <string name="progress_text_1">Analizzando la tua canzone…</string>
     <string name="progress_text_2">Creando animazioni uniche</string>
     <string name="progress_text_3">Quasi fatto…</string>

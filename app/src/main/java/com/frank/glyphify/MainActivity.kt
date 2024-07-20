@@ -1,5 +1,6 @@
 package com.frank.glyphify
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 editor.putString("appVersion", "v1-Spacewar Glyph Composer")
                 editor.apply()
             }
-            else if(model.equals(PHONE2_MODEL_ID)) {
+            else if(PHONE2_MODEL_ID.contains(model)) {
                 editor.putString("appVersion", "v1-Pong Glyph Composer")
                 editor.apply()
             }
@@ -87,7 +88,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         else {
-            permHandler.askRequiredPermissions()
+            val permissions = mutableListOf(
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+            permHandler.askRequiredPermissions(permissions, R.layout.dialog_perm_notifications)
         }
     }
 

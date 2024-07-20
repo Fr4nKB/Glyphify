@@ -24,7 +24,7 @@ def detect_beats_and_frequencies(filepath, filename):
         tempos.append(tempo)
 
         # convert beat frames to time in ms and round to nearest integer
-        beat_times = np.round(librosa.frames_to_time(beat_frames, sr=sr) * 1000).astype(int)
+        beat_times = np.round(librosa.frames_to_time(beat_frames, sr=sr) * 1000000).astype(int)
 
         # get the corresponding energy for each beat
         beat_energies = onset_env[beat_frames]

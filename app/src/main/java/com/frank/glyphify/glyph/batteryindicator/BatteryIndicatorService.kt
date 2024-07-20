@@ -119,6 +119,7 @@ class BatteryIndicatorService : Service() {
 
     override fun onDestroy() {
         try {
+            mGM.turnOff()
             mGM.closeSession()
         }
         catch (e: GlyphException) {

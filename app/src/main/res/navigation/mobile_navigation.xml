@@ -6,6 +6,11 @@
     app:startDestination="@+id/navigation_home">
 
     <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.frank.glyphify.ui.notifications.NotificationsFragment"
+        android:label="@string/title_notifications" />
+
+    <fragment
         android:id="@+id/navigation_home"
         android:name="com.frank.glyphify.ui.home.HomeFragment"
         android:label="@string/title_home"
