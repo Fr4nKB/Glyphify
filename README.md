@@ -31,13 +31,15 @@ The following features will be in BETA until Nothing give's an API key, for both
 - Phone(2a)'s battery indicator: set Glyphify to `Unrestricted` battery usage (this is will prevent Android from killing the foreground service) and **leave the app opened when you want to use this feature**. When you plug the power, the phone is laying horizontal and you wiggle it you will see the battery indicator.
 - Extended Nothing Essential notifications: go into the `Notifications` tab on the app, grant the permissions and select the zones you are interested in
 
-## Top Donors
+## Donors
 
 A huge thanks to everyone which believes in this project and shows it by donating:
-- Mirko D. - 98.76€ (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
-- Robert F. - 5.54€
-- Andrew A. - 5.54€
-- Simona D.C. - 2.95€
+- **Mirko D. - 98.76€** (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
+- **Robert F. - 5.54€**
+- **Andrew A. - 5.54€**
+- **Vadim D. - 5€**
+- **Simona D.C. - 2.95€**
+- **Bridget W. - 1.4€**
 
 
 **This app is free and ad-free**.\
