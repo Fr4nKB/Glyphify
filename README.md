@@ -37,6 +37,7 @@ A huge thanks to everyone which believes in this project and shows it by donatin
 - **Mirko D. - 98.76€** (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
 - **Robert F. - 5.54€**
 - **Andrew A. - 5.54€**
+- **Gregor B. - 5.54€**
 - **Vadim D. - 5€**
 - **Simona D.C. - 2.95€**
 - **Bridget W. - 1.4€**
