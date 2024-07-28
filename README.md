@@ -35,6 +35,7 @@ The following features will be in BETA until Nothing give's an API key, for both
 
 A huge thanks to everyone which believes in this project and shows it by donating:
 - **Mirko D. - 98.76€** (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
+- **Landon C. - 6.57€**
 - **Robert F. - 5.54€**
 - **Andrew A. - 5.54€**
 - **Gregor B. - 5.54€**
