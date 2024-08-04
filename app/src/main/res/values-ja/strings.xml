@@ -28,9 +28,9 @@
   <string name="toggle_text_5zones">5 個のゾーン</string>
   <string name="toggle_text_33zones">33 個のゾーン</string>
   <string name="progress_text_1">曲を解析しています…</string>
-  <string name="progress_text_2">ユニークなアニメーションの作成</string>
+  <string name="progress_text_2">ユニークなアニメーションを作成中</string>
   <string name="progress_text_3">あともう少しです…</string>
-  <string name="support_me">ようこそ！このアプリは、学生によって開発された広告なしの無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
+  <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
   <string name="support_paypal">コーヒーを買ってくれませんか</string>
   <string name="support_github">リポジトリに Star を付ける</string>
 </resources>
