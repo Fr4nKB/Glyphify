@@ -13,12 +13,12 @@
 https://github.com/user-attachments/assets/e40d1011-4951-478c-a690-fe725a1b3276
 
 ### Phone(2a) バッテリーインジケーター
-他の Nothing Phone で欠けていた機能が Glyphify で復活します
+他の Nothing Phone で欠けていた機能が Glyphify で蘇ります
 
 https://github.com/user-attachments/assets/b8874ed1-3cba-4fbc-b834-ed0731632519
 
 ### 拡張された Nothing Essential 通知
-必須な通知 LED として Glyph を 1 つだけ使用するのか疑問に思いませんか?
+必須な通知 LED として Glyph を 1 つだけ使用するのは疑問に思いませんか?
 Glyphify を使用することで任意の Glyph ゾーンを任意の連絡先にマッピングすることができます。
 
 ゾーンごとに 2 つの異なるライトの効果を選択可能です: 静的なパルスライトとパルスライト
