@@ -38,7 +38,7 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 ## 寄付者
 
 このプロジェクトに寄付で貢献してくださった皆様に心から感謝いたします:
-- **Mirko D. - 98.76€** (**Play ストアで彼の開発した _Nothing Community アプリ_ ** を [チェック](https://play.google.com/store/apps/details?id=com.nothing.news) してください)
+- **Mirko D. - 98.76€**  (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
 - **Landon C. - 6.57€**
 - **Robert F. - 5.54€**
 - **Andrew A. - 5.54€**
@@ -50,8 +50,8 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 - **Bridget W. - 1.4€**
 
 
-**このアプリは無料かつ広告はありません**.\
-**If you value my work** and want to support me **consider <ins>starring</ins> this repo or <ins>donating</ins> (any amount), it would help me a lot and keep me adding new features**!
+**このアプリは無料であり広告はありません**。\
+もしも **私が開発した物が評価できると思えたり、サポートをしたいのであれば** このリポジトリに <ins>Star</ins> を付けるか、<ins>寄付</ins> (金額は問いません) することをご検討ください!
 <br><br>
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL)
 
