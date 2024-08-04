@@ -55,6 +55,6 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 <br><br>
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL)
 
-## Download
+## ダウンロード
 
-You can **download** the app from the [release](https://github.com/Fr4nKB/Glyphify/releases/latest) panel
+[release](https://github.com/Fr4nKB/Glyphify/releases/latest) のパネルからアプリを **ダウンロード** できます。
