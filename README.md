@@ -1,5 +1,5 @@
 # Glyphify: multipurpose Glyph app
-[日本語](./README_JA)
+[日本語](./README_JA.md)
 ## Introduction
 **Glyphify** is an **Android app made for Nothing Phones**, it **packs multiple features to make the Glyph interface more useful**:
 
