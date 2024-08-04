@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/e40d1011-4951-478c-a690-fe725a1b3276
 
 https://github.com/user-attachments/assets/b8874ed1-3cba-4fbc-b834-ed0731632519
 
-### 拡張された Nothing の重要な通知
+### 拡張された Nothing Essential 通知
 必須な通知 LED として Glyph を 1 つだけ使用するのか疑問に思いませんか?
 Glyphify を使用することで任意の Glyph ゾーンを任意の連絡先にマッピングすることができます。
 
@@ -33,7 +33,7 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 ## BETA 版機能の使用:
 以下の機能は、API キーが提供されるまで BETA 版の機能となります。これらを動作させるには、開発者向けオプションから `Glyph Interface のデバッグモード` を有効化する必要があります。
 - Phone(2a) のバッテリーインジケーター: Glyphify のバッテリー使用量を `制限なし` に設定します (これで Android がフォアグラウンドサービスを強制終了するのを防げます)。ケーブルを差し込むと Phone が水平時に本体を揺らすとバッテリーインジケーターが表示されます。
-- 拡張された Nothing の重要な通知: アプリの `通知` タブから権限を付与して興味のあるゾーンを選択します。
+- 拡張された Nothing Essential 通知: アプリの `通知` タブから権限を付与して興味のあるゾーンを選択します。
 
 ## 寄付者
 
