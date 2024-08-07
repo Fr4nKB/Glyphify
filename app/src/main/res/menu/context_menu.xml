@@ -1,5 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action1" android:icon="@drawable/ic_glyphifier" android:title="@string/btn_apply_ringtone" />
-    <item android:id="@+id/action2" android:icon="@drawable/ic_glyphifier" android:title="@string/btn_share" />
-    <item android:id="@+id/action3" android:icon="@drawable/ic_glyphifier" android:title="@string/btn_delete" />
-</menu>
