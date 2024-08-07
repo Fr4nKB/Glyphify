@@ -6,8 +6,8 @@
 ### Glyphifier
 It's an automatic composer, choose any song (.mp3, wav etc) and it will be converted into a Glyph synched ringtone with a better accuracy compared to the built-in Nothing algorithm. Phone(2) users can also enjoy all 33 zones addressing for their ringtones. Songs are also randomic, meaning that by using the same source file you will get a different ringtone each time, choose which one you like the most!
 
-<img src="https://github.com/user-attachments/assets/f5dd76a3-3f61-46a2-84b4-cacf0a0e8f10" height="500">
-<img src="https://github.com/user-attachments/assets/43a70dc2-ba5b-4b63-a173-6b4a4aeb447c" height="500">
+<img src="https://github.com/user-attachments/assets/82a9f489-7ad8-4b62-b2b4-553003d9c253" height="500">
+<img src="https://github.com/user-attachments/assets/6c6a1d89-f3b0-4d40-b2a8-59403ba72e1e" height="500">
 <img src="https://github.com/user-attachments/assets/f236b849-a82f-4c6f-92a6-a43fd93650d3" height="500">
 
 https://github.com/user-attachments/assets/e40d1011-4951-478c-a690-fe725a1b3276
@@ -18,9 +18,9 @@ A missing feature present on other Nothing phones it's back thanks to Glyphify
 https://github.com/user-attachments/assets/b8874ed1-3cba-4fbc-b834-ed0731632519
 
 ### Extended Nothing Essential notifications
-Why use only one Glyph as an Essential notification LED? With Glyphify you can map any Glyph zone to any of your contact and also chose between two different light effect on a per zone basis: static and pulsing light
+Why use only one Glyph as an Essential notification LED? With Glyphify you can **map any Glyph zone to multiple contacts and apps** and also chose between two different light effect on a per zone basis: static and pulsing glyph
 
-<img src="https://github.com/user-attachments/assets/4a3f1ae3-9056-4c91-a92e-b56ebeb6cbd5" height="500">
+<img src="https://github.com/user-attachments/assets/590fc34b-98b2-4324-a51e-1a8484d0b9aa" height="500">
 
 https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 
