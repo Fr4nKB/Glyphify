@@ -13,12 +13,14 @@ android {
         minSdk = 34
         targetSdk = 34
         versionCode = 1
-        versionName = "1.3.5"
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("arm64-v8a")
         }
+
+        resValue("string", "NOTHING_API_KEY", "\"${System.getenv("NOTHING_API_KEY")}\"")
     }
 
     buildTypes {

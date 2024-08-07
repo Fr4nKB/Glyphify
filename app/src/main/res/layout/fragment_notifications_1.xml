@@ -4,16 +4,87 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".ui.notifications.NotificationsFragment">
+
+    <LinearLayout
+        android:id="@+id/dimming_toggle_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.025"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/toggle_dimming_title"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/dimming_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/dimming_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:checkedButton="@+id/dimming_toggle_mid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.9"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_low"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_low"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_mid"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_mid"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_high"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_high"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </LinearLayout>
 
     <ImageView
-        android:layout_width="700dp"
-        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="625dp"
         android:src="@drawable/p1_glyph"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dimming_toggle_layout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.871"
         tools:context=".ui.home.HomeFragment" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,16 +98,20 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_p1_0_0"
             android:layout_width="75dp"
-            android:layout_height="100dp"
+            android:layout_height="130dp"
             android:background="@drawable/circle"
             android:maxLines="1"
+            android:padding="0dp"
             android:textSize="19sp"
+            app:iconGravity="textTop"
+            app:iconPadding="0dp"
+            app:iconSize="35dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.255"
+            app:layout_constraintHorizontal_bias="0.223"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.172" />
+            app:layout_constraintVertical_bias="0.234" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_p1_1_1"
@@ -44,40 +119,53 @@
             android:layout_height="75dp"
             android:background="@drawable/circle"
             android:maxLines="1"
+            android:padding="0dp"
             android:textSize="19sp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="35dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.7"
+            app:layout_constraintHorizontal_bias="0.73"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.18" />
+            app:layout_constraintVertical_bias="0.24" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_p1_2_2"
-            android:layout_width="250dp"
-            android:layout_height="280dp"
+            android:layout_width="260dp"
+            android:layout_height="320dp"
             android:background="@drawable/circle"
             android:maxLines="1"
+            android:padding="0dp"
             android:textSize="19sp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="35dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.49" />
-
+            app:layout_constraintVertical_bias="0.614" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_p1_3_3"
             android:layout_width="75dp"
-            android:layout_height="55dp"
+            android:layout_height="60dp"
             android:background="@drawable/circle"
             android:maxLines="1"
+            android:padding="0dp"
             android:textSize="19sp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="35dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.786" />
+            app:layout_constraintVertical_bias="0.894" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_p1_4_4"
@@ -85,12 +173,16 @@
             android:layout_height="55dp"
             android:background="@drawable/circle"
             android:maxLines="1"
+            android:padding="0dp"
             android:textSize="19sp"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="35dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.868" />
+            app:layout_constraintVertical_bias="0.976" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

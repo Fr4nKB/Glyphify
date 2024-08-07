@@ -28,7 +28,7 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_gravity="end">
 
             <ImageButton
@@ -37,7 +37,6 @@
                 android:layout_height="55dp"
                 android:src="@drawable/ic_apply"
                 android:background="@drawable/circle"
-                android:contentDescription="app"
                 app:tint="@android:color/white" />
 
             <ImageButton
@@ -46,7 +45,6 @@
                 android:layout_height="55dp"
                 android:src="@drawable/ic_share"
                 android:background="@drawable/circle"
-                android:contentDescription="app"
                 app:tint="@android:color/white" />
 
             <ImageButton
@@ -55,7 +53,6 @@
                 android:layout_height="55dp"
                 android:src="@drawable/ic_bin"
                 android:background="@drawable/circle"
-                android:contentDescription="app"
                 app:tint="@android:color/white" />
 
         </LinearLayout>

@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.work.Worker
@@ -14,9 +15,10 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.ReturnCode
 import com.arthenica.ffmpegkit.Level
 import com.frank.glyphify.Constants.ALBUM_NAME
-import com.frank.glyphify.Constants.LEDS_PATTERN
+import com.frank.glyphify.Constants.GLYPHIFY_COMPOSER_PATTERN
 import com.frank.glyphify.Constants.LIGHT_DURATION_US
 import com.frank.glyphify.Constants.GLYPH_MAX_INTENSITY
+import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
 import com.frank.glyphify.glyph.composer.FileHandling.compressAndEncode
 import com.frank.glyphify.glyph.composer.FileHandling.getAudioDetails
 import com.frank.glyphify.glyph.composer.FileHandling.getFileExtension
@@ -42,6 +44,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
     private val expanded = inputData.getBoolean("expanded", false)
     private var numZones = 5
     private val outName = inputData.getString("outputName")
+    private val dimming_choice = inputData.getInt("dimming", -1)
 
 
     /**
@@ -95,7 +98,11 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         val avgEnergy = calculateAverageEnergy(beats)
         return beats.map { (time, energy) ->
             val normalizedTime = (time + LIGHT_DURATION_US / 2) / LIGHT_DURATION_US * LIGHT_DURATION_US
-            val normalizedEnergy = (energy * (GLYPH_MAX_INTENSITY / (2.0 * avgEnergy))).toInt()
+
+            var normalizedEnergy: Int
+            if(dimming_choice <= 0) normalizedEnergy = (energy * (GLYPH_MAX_INTENSITY / (2.0 * avgEnergy))).toInt()
+            else normalizedEnergy = dimming_choice
+
             Pair(normalizedTime, normalizedEnergy)
         }
     }
@@ -300,13 +307,16 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
 
                 var rnds: List<Int> = emptyList()
                 var zoneIndexForBeatEffect: Int = 0
+                var pair = Pair(rnds, zoneIndexForBeatEffect)
                 when(numZones) {
+                    3 -> {
+                        val initList = (0..2).toList()
+                        pair = randomizeAndTakeFirstN(initList, 1, 3)
+                    }
                     5 -> {
                         // take 2 or 3 random glyphs and light them
                         val initList = (0..4).toList()
-                        val pair = randomizeAndTakeFirstN(initList, 2, 4)
-                        rnds = pair.first
-                        zoneIndexForBeatEffect = pair.second
+                        pair = randomizeAndTakeFirstN(initList, 2, 4)
                     }
                     11 -> {
                         // decide between central glyph and other ones first
@@ -320,11 +330,12 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
                             initList = (0..2).toList() + (9..10).toList()
                         }
 
-                        val pair = randomizeAndTakeFirstN(initList, 2, 4)
-                        rnds = pair.first
-                        zoneIndexForBeatEffect = pair.second
+                        pair = randomizeAndTakeFirstN(initList, 2, 4)
                     }
                 }
+
+                rnds = pair.first
+                zoneIndexForBeatEffect = pair.second
 
                 beatWithEffect = getBeatWithEffectBasedOnSpeedAndZone(beat, tempo, zoneIndexForBeatEffect, Random.nextBoolean())
 
@@ -375,7 +386,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
      * @param beatsToExpand: beats map grouped by timestamp
      * @return expanded beats
      * */
-    private fun expandZones(beatsToExpand: List<Pair<Int, List<Int>>>):
+    private fun expandTo33Zones(beatsToExpand: List<Pair<Int, List<Int>>>):
             List<Pair<Int, List<Int>>> {
         val expandedZones: MutableList<Pair<Int, List<Int>>> = mutableListOf()
 
@@ -406,12 +417,38 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
     }
 
     /**
+     * Expand the beats to work on the 33 zones of Phone(2)
+     * @param beatsToExpand: beats map grouped by timestamp
+     * @return expanded beats
+     * */
+    private fun expandTo26Zones(beatsToExpand: List<Pair<Int, List<Int>>>):
+            List<Pair<Int, List<Int>>> {
+        val expandedZones: MutableList<Pair<Int, List<Int>>> = mutableListOf()
+
+        for ((timestamp, lightIntensities) in beatsToExpand) {
+            var expandedList = lightIntensities.toMutableList()
+
+            // fetch element to expand
+            val element0 = lightIntensities[0]
+
+            // insert 23 copies of element 0
+            for (i in 0 until 23) {
+                expandedList.add(0, element0)
+            }
+
+            expandedZones.add(Pair(timestamp, expandedList))
+        }
+
+        return expandedZones
+    }
+
+    /**
      * Build a Custom1 tag which shows the string 'GLIPHIFY' in the Composer app
      * @param audioLen: the duration of the audio in seconds
      * @return the compressed and encoded data for the preview
      * */
     private fun buildCustom1Tag(audioLen: Double): String {
-        val ledsPattern = LEDS_PATTERN.split(",")
+        val ledsPattern = GLYPHIFY_COMPOSER_PATTERN.split(",")
 
         // 10s -> 400ms for close led, 600ms for a space
         // 1s -> 40ms, 60ms
@@ -566,7 +603,8 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
 
     override fun doWork(): Result {
         FFmpegKitConfig.setLogLevel(Level.AV_LOG_QUIET)
-        numZones = 5
+        if(Build.MODEL == PHONE2A_MODEL_ID) numZones = 3
+        else numZones = 5
 
         // copy input file into app's filesystem and convert to wav
         try {
@@ -599,8 +637,13 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         setProgressAsync(workDataOf("PROGRESS" to 70))
 
         if(expanded) {      // if device is Phone(2), expand to 33 zones
-            animatedBeats = expandZones(animatedBeats)
+            animatedBeats = expandTo33Zones(animatedBeats)
             numZones = 33
+            setProgressAsync(workDataOf("PROGRESS" to 75))
+        }
+        else if(numZones == 3) {
+            animatedBeats = expandTo26Zones(animatedBeats)
+            numZones = 26
             setProgressAsync(workDataOf("PROGRESS" to 75))
         }
 

@@ -6,43 +6,146 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/expanded_toggle"
+    <LinearLayout
+        android:id="@+id/expanded_toggle_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/btn_select_file"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:selectionRequired="true"
-        app:singleSelection="true"
-        app:layout_constraintVertical_bias="0.9"
-        app:checkedButton="@+id/expanded_toggle_5">
+        app:layout_constraintVertical_bias="0.025">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/expanded_toggle_5"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:text="@string/toggle_text_5zones"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            app:cornerRadius="25dp"
-            android:backgroundTint="@drawable/style_expanded_toggle" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/toggle_expanded_title"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/expanded_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/expanded_toggle_33"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:text="@string/toggle_text_33zones"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            app:cornerRadius="25dp"
-            android:backgroundTint="@drawable/style_expanded_toggle" />
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/expanded_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:checkedButton="@+id/expanded_toggle_5"
+            app:layout_constraintBottom_toTopOf="@+id/dimming_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.9"
+            app:selectionRequired="true"
+            app:singleSelection="true">
 
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expanded_toggle_5"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_5zones"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expanded_toggle_33"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_33zones"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dimming_toggle_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/expanded_toggle_layout"
+        app:layout_constraintVertical_bias="0.04">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/toggle_dimming_title"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/dimming_toggle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/dimming_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:checkedButton="@+id/dimming_toggle_var"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.9"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_low"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_low"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_mid"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_mid"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_high"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_high"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dimming_toggle_var"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:backgroundTint="@drawable/style_expanded_toggle"
+                android:text="@string/toggle_text_dimming_var"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                app:cornerRadius="25dp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_select_file"
@@ -54,14 +157,11 @@
         android:textSize="12sp"
         app:backgroundTint="@color/black_russian"
         app:cornerRadius="100dp"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="90dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.25" />
+        app:layout_constraintTop_toBottomOf="@id/dimming_toggle_layout"
+        app:layout_constraintVertical_bias="0.1" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_glyphify"

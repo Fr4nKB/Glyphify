@@ -12,22 +12,32 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.BatteryManager
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.PowerManager
 import android.util.Log
 import com.frank.glyphify.Constants.CHANNEL_ID
 import com.frank.glyphify.R
+import com.frank.glyphify.glyph.notificationmanager.ExtendedEssentialService
 import com.nothing.ketchum.Common
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class BatteryIndicatorService : Service() {
     private lateinit var mGM: GlyphManager
     private var mCallback: GlyphManager.Callback? = null
-
     private lateinit var sensorEventListener: SensorEventListener
     private var lastShakeTime: Long = 0
+    private val serviceScope = CoroutineScope(Dispatchers.Default)
+    private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var powerConnectionReceiver: PowerConnectionReceiver
 
     // hold sensor values of the previous event
     var lastX = 0f
@@ -44,30 +54,23 @@ class BatteryIndicatorService : Service() {
         return (level / scale.toFloat() * 100).toInt()
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        return null
+    private fun signalEE() {
+        val serviceIntent = Intent(this, ExtendedEssentialService::class.java)
+        serviceIntent.action = "SHOW_GLYPHS"
+        startService(serviceIntent)
     }
 
-    override fun onCreate() {
-        super.onCreate()
-
-        init()
-
-        val localGM = GlyphManager.getInstance(applicationContext)
-        localGM?.init(mCallback)
-        mGM = localGM
-
+    private fun registerSensorListener() {
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
         sensorEventListener = object : SensorEventListener {
+            val shakeThreshold = 0.25
+
             override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
             }
 
             override fun onSensorChanged(event: SensorEvent) {
-
-                val shakeThreshold = 0.25
-
-                if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                if(event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                     val x = event.values[0]
                     val y = event.values[1]
                     val z = event.values[2]
@@ -83,29 +86,45 @@ class BatteryIndicatorService : Service() {
                     lastZ = z
 
                     // check if the device is approximately horizontal
-                    if ((Math.abs(z) - 9.8) < 1 && Math.abs(x) < 2 && Math.abs(y) < 2) {
+                    if((Math.abs(z) - 9.8) < 1 && Math.abs(x) < 2 && Math.abs(y) < 2) {
 
                         val currentTime = System.currentTimeMillis()
 
-                        if (shakeForce > shakeThreshold && currentTime - lastShakeTime > 3500) {
+                        if(shakeForce > shakeThreshold && currentTime - lastShakeTime > 3500) {
                             lastShakeTime = currentTime
 
                             val builder = mGM.glyphFrameBuilder
                             val batteryLevel = getBatteryPercentage(applicationContext)
                             val batteryIndicatorFrame = builder.buildChannel(Glyph.Code_23111.C_1).build()
 
-                            // the progress value doesn't work as expected, rescaling the battery
-                            // percentage to make the glyph progression make sense
-                            mGM.displayProgressAndToggle(
-                                batteryIndicatorFrame,
-                                (batteryLevel * 0.8).toInt(),
-                                false)
+                            serviceScope.launch {
+                                try {
+                                    val wakeLockTime = 10 * 1000
 
-                            // all methods like buildPeriod etc don't seem to work, workaround
-                            Thread.sleep(3000)
-                            mGM.turnOff()
+                                    if(!wakeLock.isHeld) wakeLock.acquire(wakeLockTime.toLong())
+
+                                    for(i in 0..batteryLevel step 10) {
+                                        mGM.displayProgressAndToggle(
+                                            batteryIndicatorFrame,
+                                            i,
+                                            false)
+
+                                        delay(30)
+                                    }
+
+                                    delay(3000)
+                                    mGM.turnOff()
+                                    signalEE()
+                                }
+                                finally {
+                                    if(wakeLock.isHeld) wakeLock.release()
+                                }
+                            }
+
                         }
+
                     }
+
                 }
             }
         }
@@ -115,6 +134,40 @@ class BatteryIndicatorService : Service() {
             sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
             SensorManager.SENSOR_DELAY_NORMAL
         )
+    }
+
+    private fun unregisterSensorListener() {
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager.unregisterListener(sensorEventListener)
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            init()
+            val localGM = GlyphManager.getInstance(applicationContext)
+            localGM?.init(mCallback)
+            mGM = localGM
+        }, 3 * 1000)
+
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "Glyhpify::BatteryIndicator"
+        )
+
+        // use this service to register Phone(2a)'s battery indicator
+        powerConnectionReceiver = PowerConnectionReceiver()
+        val powerFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        }
+        registerReceiver(powerConnectionReceiver, powerFilter)
     }
 
     override fun onDestroy() {
@@ -127,8 +180,9 @@ class BatteryIndicatorService : Service() {
         }
         mGM.unInit()
 
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensorManager.unregisterListener(sensorEventListener)
+        unregisterReceiver(powerConnectionReceiver)
+        unregisterSensorListener()
+
         super.onDestroy()
     }
 
@@ -141,6 +195,7 @@ class BatteryIndicatorService : Service() {
 
                 try {
                     mGM.openSession()
+                    mGM.turnOff()
                 }
                 catch (e: GlyphException) {
                     Log.e(TAG, e.message!!)
@@ -148,18 +203,34 @@ class BatteryIndicatorService : Service() {
             }
 
             override fun onServiceDisconnected(componentName: ComponentName) {
+                mGM.turnOff()
                 mGM.closeSession()
             }
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification: Notification = Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle(this.getString(R.string.app_name))
-            .setContentText(this.getString(R.string.service_battery_indicator_title))
-            .build()
 
-        startForeground(42, notification)
+        if(intent != null) {
+            val action = intent.action
+            if(action == "POWER_ON") {
+                registerSensorListener()
+            }
+            else if(action == "POWER_OFF") {
+                mGM.turnOff()
+                unregisterSensorListener()
+                signalEE()
+            }
+            else {
+                val notification: Notification = Notification.Builder(this, CHANNEL_ID)
+                    .setContentTitle(this.getString(R.string.title_foreground_notification))
+                    .setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_sunlight)
+                    .build()
+
+                startForeground(2, notification)
+            }
+        }
 
         return START_STICKY
     }

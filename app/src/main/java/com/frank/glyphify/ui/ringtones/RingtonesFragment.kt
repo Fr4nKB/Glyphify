@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +28,6 @@ import com.frank.glyphify.ui.dialogs.Dialog
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
-
 
 class RingtonesFragment : Fragment() {
 
@@ -95,14 +95,15 @@ class RingtonesFragment : Fragment() {
             val file = files[position]
             holder.textView.text = file.nameWithoutExtension
 
-            holder.itemView.setOnClickListener() {
+            holder.itemView.setOnClickListener {
                 val previousPos = lastKnownPos
-                if(lastKnownPos == position) {     // the same item has been tapped
+                if(lastKnownPos == position) {  // the same item has been tapped
                     lastKnownPos = -1
                     holder.toolbarBtnsWrapper.visibility = View.GONE
                 }
-                else {      // a different item was tapped
+                else {  // a different item was tapped
                     lastKnownPos = position
+                    holder.toolbarBtnsWrapper.visibility = View.VISIBLE
                 }
 
                 // If an item was previously selected, refresh it to remove the highlight and hide the buttons

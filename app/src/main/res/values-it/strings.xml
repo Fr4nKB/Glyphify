@@ -11,6 +11,9 @@
     <string name="btn_stop">Ferma</string>
     <string name="msg_alert_output_name">INSERISCI UN NOME PER LA SUONERIA</string>
     <string name="btn_apply_ringtone">Applica suoneria</string>
+    <string name="btn_ee_static">STATICO</string>
+    <string name="btn_ee_pulse">RESPIRO</string>
+    <string name="btn_add_app">APP</string>
 
     <string name="btn_share">Condividi</string>
     <string name="btn_delete">Elimina</string>
@@ -27,12 +30,17 @@
     <string name="title_new_version">Aggiornamento Glyphify</string>
     <string name="msg_new_version">Una nuova versione è disponibile, premi per scaricare su GitHub</string>
 
-    <string name="service_battery_indicator_title">Servizio per l\'indicatore di batteria Glyph per Phone(2a). Chiudi Glyphify se non desideri questa feature.</string>
-    <string name="service_notification_manager_title">Servizio per le notifiche Glyph persistenti personalizzate</string>
+    <string name="title_foreground_notification">Rendendo i Glpyhs di nuovo utili</string>
 
-    <string name="expanded_checkbox_desc">Usa tutte le 33 zone</string>
+    <string name="toggle_expanded_title">NUMERO ZONE</string>
     <string name="toggle_text_5zones">5 ZONE</string>
     <string name="toggle_text_33zones">33 ZONE</string>
+
+    <string name="toggle_dimming_title">INTENSITÀ GLYPH</string>
+    <string name="toggle_text_dimming_low">BASSA</string>
+    <string name="toggle_text_dimming_mid">MEDIA</string>
+    <string name="toggle_text_dimming_high">ALTA</string>
+    <string name="toggle_text_dimming_var">VARIABILE</string>
 
     <string name="progress_text_1">Analizzando la tua canzone…</string>
     <string name="progress_text_2">Creando animazioni uniche</string>

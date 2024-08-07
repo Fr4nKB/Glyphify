@@ -8,18 +8,45 @@
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="com.frank.glyphify.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications" />
+        android:label="@string/title_notifications" >
+        <action
+            android:id="@+id/action_navigation_notifications_to_navigation_contacts_choice"
+            app:destination="@id/navigation_contacts_choice" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.frank.glyphify.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_ringtones"
+            app:destination="@id/navigation_ringtones" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_notifications"
+            app:destination="@id/navigation_notifications" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_ringtones"
         android:name="com.frank.glyphify.ui.ringtones.RingtonesFragment"
         android:label="@string/title_ringtones"
         tools:layout="@layout/fragment_ringtones" />
+
+    <fragment
+        android:id="@+id/navigation_contacts_choice"
+        android:name="com.frank.glyphify.ui.notifications.ContactsChoiceFragment"
+        android:label="Contacts Choice"
+        tools:layout="@layout/fragment_contacts_choice" >
+        <action
+            android:id="@+id/action_navigation_contacts_choice_to_navigation_apps_choice"
+            app:destination="@id/navigation_apps_choice" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_apps_choice"
+        android:name="com.frank.glyphify.ui.notifications.AppsChoiceFragment"
+        android:label="Apps Choice"
+        tools:layout="@layout/fragment_apps_choice" />
 
 </navigation>

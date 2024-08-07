@@ -26,7 +26,7 @@ object Dialog {
         isCancelable: Boolean = true,
         delayEnableButtonId: Int? = null,
         delayMillis: Long = 0,
-        onDismiss: (() -> Unit)? = null  // Add this parameter
+        onDismiss: (() -> Unit)? = null
     ) {
         val dialogView = LayoutInflater.from(context).inflate(layoutId, null)
         val dialog = AlertDialog.Builder(context)
@@ -59,7 +59,7 @@ object Dialog {
             }, delayMillis)
         }
 
-        dialog.setOnDismissListener {  // Set the listener here
+        dialog.setOnDismissListener {
             onDismiss?.invoke()
         }
 
@@ -89,9 +89,7 @@ object Dialog {
             isCancelable = false,
             delayEnableButtonId = R.id.negativeButton,
             delayMillis = 10000,
-            onDismiss = {
-                // Ask for the permission here
-            }
+            onDismiss = {}
         )
     }
 }

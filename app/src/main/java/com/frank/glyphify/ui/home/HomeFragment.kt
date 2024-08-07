@@ -8,6 +8,7 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import androidx.lifecycle.Observer
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.frank.glyphify.Constants.DIMMING_VALUES
 import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
@@ -69,9 +71,18 @@ class HomeFragment : Fragment() {
             val expandedToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.expanded_toggle)
             expandedToggle.isEnabled = false
 
+            val dimmingToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.dimming_toggle)
+            val selectedButtonIndex = dimmingToggle.indexOfChild(
+                dimmingToggle.findViewById(
+                    dimmingToggle.checkedButtonId
+                )
+            )
+            dimmingToggle.isEnabled = false
+
             val data = Data.Builder()
                 .putString("uri", selectedFileUri.toString())
                 .putBoolean("expanded", expandedToggle.checkedButtonId == R.id.expanded_toggle_33)
+                .putInt("dimming", DIMMING_VALUES[selectedButtonIndex])
                 .putString("outputName", name)
                 .build()
 
@@ -109,6 +120,7 @@ class HomeFragment : Fragment() {
                                 ContextCompat.getColorStateList(requireContext(), R.color.black_russian);
 
                             expandedToggle.isEnabled = true
+                            dimmingToggle.isEnabled = true
 
                             linLayoutProgress.visibility = View.GONE
 
@@ -159,7 +171,6 @@ class HomeFragment : Fragment() {
         }
 
 
-
         // color the progress bar in red and make it visible
         val progressBar = requireView().findViewById<ProgressBar>(R.id.progress_bar)
         progressBar.setProgressTintList(
@@ -168,25 +179,41 @@ class HomeFragment : Fragment() {
                     requireContext(), R.color.red
                 )
             )
-        );
+        )
+
+
+        val sharedPref: SharedPreferences =
+            requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        val dimmingToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.dimming_toggle)
+        var lastSelectionToggleId = sharedPref.getInt("dimming_glyphifier_toggle_id", R.id.dimming_toggle_var)
+
+        dimmingToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val editor: SharedPreferences.Editor = sharedPref.edit()
+                editor.putInt("dimming_glyphifier_toggle_id", checkedId)
+                editor.apply()
+            }
+        }
+
+        dimmingToggle.check(lastSelectionToggleId)
 
         if(PHONE2_MODEL_ID.contains(Build.MODEL)) {
+            val expandedToggleLayout = requireView().findViewById<LinearLayout>(R.id.expanded_toggle_layout)
             val expandedToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.expanded_toggle)
 
-            val sharedPref: SharedPreferences =
-                requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
-            val lastSelectionToggleId = sharedPref.getInt("toggleId", R.id.expanded_toggle_5)
+            lastSelectionToggleId = sharedPref.getInt("expanded_toggle_id", R.id.expanded_toggle_5)
 
             expandedToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
                 if (isChecked) {
                     val editor: SharedPreferences.Editor = sharedPref.edit()
-                    editor.putInt("toggleId", checkedId)
+                    editor.putInt("expanded_toggle_id", checkedId)
                     editor.apply()
                 }
             }
 
             expandedToggle.check(lastSelectionToggleId)
-            expandedToggle.visibility = View.VISIBLE
+            expandedToggleLayout.visibility = View.VISIBLE
 
         }
     }

@@ -8,14 +8,15 @@ class PowerConnectionReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
 
-        // dedicate to Phone(2a) users
-        if (action == Intent.ACTION_POWER_CONNECTED) {
+        if(action == Intent.ACTION_POWER_CONNECTED) {
             val serviceIntent = Intent(context, BatteryIndicatorService::class.java)
-            context.startForegroundService(serviceIntent)
+            serviceIntent.action = "POWER_ON"
+            context.startService(serviceIntent)
         }
-        else if (action == Intent.ACTION_POWER_DISCONNECTED) {
+        else if(action == Intent.ACTION_POWER_DISCONNECTED) {
             val serviceIntent = Intent(context, BatteryIndicatorService::class.java)
-            context.stopService(serviceIntent)
+            serviceIntent.action = "POWER_OFF"
+            context.startService(serviceIntent)
         }
     }
 }
