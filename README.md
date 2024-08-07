@@ -27,11 +27,6 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 ## Compatibility
 The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
 
-## BETA features usage:
-The following features will be in BETA until Nothing give's an API key, for both of these to work you first need to go into developer settings and activate `Glyph Interface debug mode`
-- Phone(2a)'s battery indicator: set Glyphify to `Unrestricted` battery usage (this is will prevent Android from killing the foreground service). When you plug the power, the phone is laying horizontal and you wiggle it you will see the battery indicator.
-- Extended Nothing Essential notifications: go into the `Notifications` tab on the app, grant the permissions and select the zones you are interested in
-
 ## Donors
 
 A huge thanks to everyone which believes in this project and shows it by donating:
