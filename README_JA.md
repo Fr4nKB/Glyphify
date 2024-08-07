@@ -6,8 +6,8 @@
 ### Glyphifier
 自動作曲機能で、任意の曲 (.mp3 や .wav など) を選択すると内蔵の Nothing アルゴリズムよりも高精度な Glyph 同期着信音に変換されます。Phone(2) のユーザーは、着信音として 33 個のゾーンすべてに対応させることも可能です。ランダムで生成されるので同じソースとなる曲を使用しても、毎回異なる着信音が生成されます。最も気に入った物を選んでください。
 
-<img src="https://github.com/user-attachments/assets/f5dd76a3-3f61-46a2-84b4-cacf0a0e8f10" height="500">
-<img src="https://github.com/user-attachments/assets/43a70dc2-ba5b-4b63-a173-6b4a4aeb447c" height="500">
+<img src="https://github.com/user-attachments/assets/82a9f489-7ad8-4b62-b2b4-553003d9c253" height="500">
+<img src="https://github.com/user-attachments/assets/6c6a1d89-f3b0-4d40-b2a8-59403ba72e1e" height="500">
 <img src="https://github.com/user-attachments/assets/f236b849-a82f-4c6f-92a6-a43fd93650d3" height="500">
 
 https://github.com/user-attachments/assets/e40d1011-4951-478c-a690-fe725a1b3276
@@ -23,7 +23,7 @@ Glyphify を使用することで任意の Glyph ゾーンを任意の連絡先�
 
 ゾーンごとに 2 つの異なるライトの効果を選択可能です: 静的なパルスライトとパルスライト
 
-<img src="https://github.com/user-attachments/assets/4a3f1ae3-9056-4c91-a92e-b56ebeb6cbd5" height="500">
+<img src="https://github.com/user-attachments/assets/590fc34b-98b2-4324-a51e-1a8484d0b9aa" height="500">
 
 https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 
