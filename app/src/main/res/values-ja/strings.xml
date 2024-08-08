@@ -20,7 +20,7 @@
     <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
     <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可する</string>
     <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可する</string>
-    <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢必須の通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
+    <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">中止する</string>
     <string name="title_new_version">Glyphify のアップデート</string>
