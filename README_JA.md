@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/e40d1011-4951-478c-a690-fe725a1b3276
 https://github.com/user-attachments/assets/b8874ed1-3cba-4fbc-b834-ed0731632519
 
 ### 拡張された Nothing Essential 通知
-何故 1 つの Glyph だけを Essential 通知の LED として使用をするのかと疑問に思いませんか?
+Essential 通知の LED として Glyph を 1 つだけ使用するのは疑問に思いませんか?
 Glyphify を使用することで**任意の Glyph ゾーンを連絡先やアプリにマッピング**、2 種類の異なるライトの効果をゾーンに割り当てられます。
 
 選択可能なライトの効果: 静的な Glyph とパルス効果の Glyph
