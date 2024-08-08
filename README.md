@@ -36,6 +36,7 @@ A huge thanks to everyone which believes in this project and shows it by donatin
 - **Andrew A. - 5.54€**
 - **Gregor B. - 5.54€**
 - **Kilian B. - 5.54€**
+- **René H. - 5.54€**
 - **Vadim D. - 5€**
 - **Simona D.C. - 2.95€**
 - **Boris B. - 2.95€**
