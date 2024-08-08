@@ -1,51 +1,42 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Glyphify</string>
     <string name="title_home">Glyphifier</string>
     <string name="title_ringtones">着信音</string>
     <string name="title_notifications">通知</string>
-
     <string name="btn_file_selection">ファイルを選択</string>
     <string name="btn_desc_file_selection">ファイルを選択</string>
     <string name="btn_start">開始</string>
     <string name="btn_stop">停止</string>
     <string name="msg_alert_output_name">着信音の名前を入力してください</string>
     <string name="btn_apply_ringtone">着信音を適用</string>
-    <string name="btn_ee_static">STATIC</string>
-    <string name="btn_ee_pulse">PULSE</string>
-    <string name="btn_add_app">APP</string>
-
+    <string name="btn_ee_static">静的</string>
+    <string name="btn_ee_pulse">パルス</string>
+    <string name="btn_add_app">アプリ</string>
     <string name="btn_share">共有</string>
     <string name="btn_delete">削除</string>
     <string name="btn_donate">寄付</string>
-
     <string name="toast_ringtone_applied">デフォルトの着信音を適用しました</string>
     <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
     <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可する</string>
     <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可する</string>
-    <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢必須の通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
+    <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">中止する</string>
-
     <string name="title_new_version">Glyphify のアップデート</string>
     <string name="msg_new_version">新しいバージョンが公開されています。タップして GitHub からダウンロードしてください。</string>
-
-    <string name="title_foreground_notification">Making Glyphs useful again</string>
-
-    <string name="toggle_expanded_title">NUMBER OF ZONES</string>
+    <string name="title_foreground_notification">Glyph の有用性を取り戻します</string>
+    <string name="toggle_expanded_title">ゾーンの数</string>
     <string name="toggle_text_5zones">5 個のゾーン</string>
     <string name="toggle_text_33zones">33 個のゾーン</string>
-
-    <string name="toggle_dimming_title">GLYPH INTENSITY</string>
-    <string name="toggle_text_dimming_low">LOW</string>
-    <string name="toggle_text_dimming_mid">MID</string>
-    <string name="toggle_text_dimming_high">HIGH</string>
-    <string name="toggle_text_dimming_var">VARIABLE</string>
-
+    <string name="toggle_dimming_title">GLYPH の強度</string>
+    <string name="toggle_text_dimming_low">低</string>
+    <string name="toggle_text_dimming_mid">中</string>
+    <string name="toggle_text_dimming_high">高</string>
+    <string name="toggle_text_dimming_var">バリアブル</string>
     <string name="progress_text_1">曲を解析しています…</string>
     <string name="progress_text_2">ユニークなアニメーションを作成中</string>
     <string name="progress_text_3">あともう少しです…</string>
-
     <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
     <string name="support_paypal">コーヒーを買ってくれませんか</string>
     <string name="support_github">リポジトリに Star を付ける</string>
