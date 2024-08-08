@@ -39,6 +39,7 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 - **Andrew A. - 5.54€**
 - **Gregor B. - 5.54€**
 - **Kilian B. - 5.54€**
+- **René H. - 5.54€**
 - **Vadim D. - 5€**
 - **Simona D.C. - 2.95€**
 - **Boris B. - 2.95€**
