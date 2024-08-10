@@ -14,8 +14,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toolbar_btn_back"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/circle"
+            android:maxLines="1"
+            android:padding="0dp"
+            android:textSize="19sp"
+            app:icon="@drawable/ic_back"
+            app:iconGravity="textTop"
+            app:iconPadding="0dp"
+            app:iconSize="24dp" />
+
         <TextView
-            android:id="@+id/custom_title"
+            android:id="@+id/toolbar_app_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/dot_matri"
@@ -30,6 +43,14 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             android:layout_gravity="end">
+
+            <ImageButton
+                android:id="@+id/btn_playRingtone"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:src="@drawable/ic_play"
+                android:background="@drawable/circle"
+                app:tint="@android:color/white" />
 
             <ImageButton
                 android:id="@+id/btn_applyRingtone"

@@ -7,8 +7,6 @@
 
     <string name="btn_file_selection">Seleziona un file</string>
     <string name="btn_desc_file_selection">Seleziona un file</string>
-    <string name="btn_start">Avvia</string>
-    <string name="btn_stop">Ferma</string>
     <string name="msg_alert_output_name">INSERISCI UN NOME PER LA SUONERIA</string>
     <string name="btn_apply_ringtone">Applica suoneria</string>
     <string name="btn_ee_static">STATICO</string>
@@ -45,6 +43,8 @@
     <string name="progress_text_1">Analizzando la tua canzone…</string>
     <string name="progress_text_2">Creando animazioni uniche</string>
     <string name="progress_text_3">Quasi fatto…</string>
+
+    <string name="snackbar_long_tap_remove">Tieni premuto su un elemento per rimuoverlo</string>
 
     <string name="support_me">Benvenuto! Questa è un\'app gratis e senza pubblicità fatta da uno studente. Se trovi valore nel mio lavoro e vorresti dimostrare il tuo apprezzamento, valuta la possibilità di fare una donazione o di assegnare una stella alla mia repository GitHub. Qualsiasi supporto è apprezzato, grazie per aver letto!</string>
     <string name="support_paypal">Comprami un caffè</string>

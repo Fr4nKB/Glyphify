@@ -9,17 +9,20 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.ContactsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,9 +35,10 @@ import com.frank.glyphify.Util.fromNumToString
 import com.frank.glyphify.Util.loadPreferences
 import com.frank.glyphify.Util.resizeDrawable
 import com.frank.glyphify.databinding.FragmentContactsChoiceBinding
-import com.frank.glyphify.glyph.notificationmanager.ExtendedEssentialService
+import com.frank.glyphify.glyph.extendedessential.ExtendedEssentialService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigInteger
@@ -148,6 +152,22 @@ class ContactsChoiceFragment: Fragment() {
         return Pair(appName, icon)
     }
 
+    private fun isFirstUsage(): Boolean {
+        val sharedPref: SharedPreferences =
+            requireActivity().getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        return sharedPref.getBoolean("firstusage", true)
+    }
+
+    private fun setFirstUsage() {
+        val sharedPref: SharedPreferences =
+            requireActivity().getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putBoolean("firstusage", false)
+        editor.apply()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -215,13 +235,27 @@ class ContactsChoiceFragment: Fragment() {
 
         val btnAddApp = requireView().findViewById<MaterialButton>(R.id.btn_add_app)
         btnAddApp.setOnClickListener {
-            findNavController().navigate(R.id.navigation_apps_choice)
+            val navOptions = NavOptions.Builder()
+                .setEnterAnim(R.anim.fade_in)
+                .setExitAnim(R.anim.fade_out)
+                .setPopEnterAnim(R.anim.fade_in)
+                .setPopExitAnim(R.anim.fade_out)
+                .build()
+            findNavController().navigate(R.id.navigation_apps_choice, null, navOptions)
+        }
+
+        val btnBack = requireActivity().findViewById<MaterialButton>(R.id.toolbar_btn_back)
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        requireActivity().findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
+        val activity = requireActivity()
+        activity.findViewById<MaterialButton>(R.id.toolbar_btn_back).visibility = View.VISIBLE
+        activity.findViewById<TextView>(R.id.toolbar_app_name).visibility = View.GONE
+        activity.findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
 
         val bottomNavigationView: BottomNavigationView = requireActivity().findViewById(R.id.nav_view)
         val menu: Menu = bottomNavigationView.menu
@@ -278,6 +312,18 @@ class ContactsChoiceFragment: Fragment() {
                 savePreferences()
                 notifyDataSetChanged()
                 true
+            }
+
+            if(position == 0 && isFirstUsage()) {
+                setFirstUsage()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val snackbar = Snackbar.make(
+                        requireView(),
+                        getString(R.string.snackbar_long_tap_remove),
+                        Snackbar.LENGTH_SHORT)
+                    snackbar.anchorView = requireActivity().findViewById(R.id.nav_view)
+                    snackbar.show()
+                }, 500)
             }
         }
 

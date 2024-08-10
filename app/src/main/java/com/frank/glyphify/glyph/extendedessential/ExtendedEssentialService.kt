@@ -1,4 +1,4 @@
-package com.frank.glyphify.glyph.notificationmanager
+package com.frank.glyphify.glyph.extendedessential
 
 import android.app.Notification
 import android.app.Person
@@ -13,16 +13,15 @@ import android.os.PowerManager
 import android.provider.ContactsContract
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import com.frank.glyphify.Constants.CHANNEL_ID
 import com.frank.glyphify.Constants.GLYPH_DEFAULT_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MAX_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MID_INTENSITY
 import com.frank.glyphify.R
 import com.frank.glyphify.Util.fromStringToNum
+import com.frank.glyphify.Util.getGlyphMapping
 import com.frank.glyphify.Util.loadPreferences
 import com.nothing.ketchum.Common
-import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
 import com.nothing.ketchum.GlyphManager
@@ -68,41 +67,6 @@ class ExtendedEssentialService: NotificationListenerService() {
                 mGM?.closeSession()
             }
         }
-    }
-
-    /**
-     * Used to pass from a simplified glyph addressing to the Nothing's glyph addressing
-     * @param index: simplified index for glyph zones
-     * @return list of ints containing the actual glyph zones
-     * */
-    private fun getGlyphMapping(index: Int): List<Int> {
-        var glyphIndexes: List<Int>
-        when(index) {
-            2 -> {
-                if(Common.is20111()) {
-                    glyphIndexes = (Glyph.Code_20111.C1..Glyph.Code_20111.C4).toList()
-                }
-                else if(Common.is23111()) {
-                    glyphIndexes = (Glyph.Code_23111.C_1..Glyph.Code_23111.C_24).toList()
-                }
-                else glyphIndexes = listOf(index)
-            }
-            3 -> {
-                if(Common.is20111()) {
-                    glyphIndexes = (Glyph.Code_20111.D1_1..Glyph.Code_20111.D1_8).toList()
-                }
-                else if(Common.is22111()) {
-                    glyphIndexes = (Glyph.Code_22111.C1_1..Glyph.Code_22111.C1_16).toList()
-                }
-                else glyphIndexes = listOf(index)
-            }
-            9 -> {
-                glyphIndexes = (Glyph.Code_22111.D1_1..Glyph.Code_22111.D1_8).toList()
-            }
-            else -> glyphIndexes = listOf(index)
-        }
-
-        return glyphIndexes
     }
 
     /**
@@ -194,6 +158,7 @@ class ExtendedEssentialService: NotificationListenerService() {
         var framePulse: GlyphFrame.Builder
 
         if(mGM == null) return
+        mGM?.openSession()
 
         frameStatic = mGM!!.glyphFrameBuilder
         for(zone in activeZonesStatic) {
@@ -206,7 +171,7 @@ class ExtendedEssentialService: NotificationListenerService() {
                 try {
                     val wakeLockTime = 2 * 60 * 1000
                     val delayBetweenAnimations = 4000L
-                    var perStepDelay = 25L
+                    val perStepDelay = 25L
                     val stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
 
                     // acquire wakelock to prevent phone from sleeping when animation is displayed
@@ -222,7 +187,7 @@ class ExtendedEssentialService: NotificationListenerService() {
                                 framePulse = framePulse.buildChannel(zone, light)
                             }
 
-                            mGM!!.toggle(framePulse.build())
+                            mGM?.toggle(framePulse.build())
                             delay(perStepDelay)
                         }
 
@@ -234,7 +199,7 @@ class ExtendedEssentialService: NotificationListenerService() {
                     activeZonesPulse.forEach { zone ->
                         framePulse = framePulse.buildChannel(zone)
                     }
-                    mGM!!.toggle(framePulse.build())
+                    mGM?.toggle(framePulse.build())
                 }
                 finally {
                     if(wakeLock.isHeld) wakeLock.release()
@@ -250,10 +215,11 @@ class ExtendedEssentialService: NotificationListenerService() {
 
             // no pulsing glyph, turn on glyph for static effect if any
             if(activeZonesStatic.isNotEmpty()) {
-                mGM!!.toggle(frameStatic.build())
+                mGM?.toggle(frameStatic.build())
             }
             else {
-                mGM!!.turnOff()
+                mGM?.turnOff()
+                mGM?.closeSession()
             }
         }
     }
@@ -346,7 +312,7 @@ class ExtendedEssentialService: NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         // get glyph mapping for app if it exists and update active zones
-        var glyphAppMapping = extractGlyphMappingFromPackageName(sbn.packageName)
+        val glyphAppMapping = extractGlyphMappingFromPackageName(sbn.packageName)
         var appMapping: Triple<Int, String, Boolean>? = null
 
         // package name plus notification key to keep track of all notification from an app
@@ -361,7 +327,7 @@ class ExtendedEssentialService: NotificationListenerService() {
         if(message.second != null) {
 
             // given contact name, get corresponding contact mapping (index, contactId, pulseBoolean)
-            var glyphContactMapping = extractGlyphMappingFromContractName(message.second as String) ?: return
+            val glyphContactMapping = extractGlyphMappingFromContractName(message.second as String) ?: return
             val contactMapping = Triple(glyphContactMapping.first, sbn.key, glyphContactMapping.third)
 
             if(message.first == 2) {    // new notification, try to add contact to active contacts
@@ -431,6 +397,7 @@ class ExtendedEssentialService: NotificationListenerService() {
             else if(action == "PHONE_UNLOCKED") {
                 serviceJob?.cancel()
                 mGM?.turnOff()
+                mGM?.closeSession()
             }
             else if(action == "UPDATE_MAPPING") {
                 glyphsMapping = loadPreferences(this, numZones)

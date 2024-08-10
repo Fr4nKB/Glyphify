@@ -1,9 +1,8 @@
-package com.frank.glyphify.glyph.notificationmanager
+package com.frank.glyphify.glyph.extendedessential
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-
 
 class ExtendedEssentialReceiver : BroadcastReceiver() {
     private var isPhoneLocked = false

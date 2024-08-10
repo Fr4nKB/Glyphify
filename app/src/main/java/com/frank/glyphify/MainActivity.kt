@@ -5,32 +5,23 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import com.frank.glyphify.Constants.CHANNEL_ID
-import com.frank.glyphify.Constants.DIMMING_VALUES
 import com.frank.glyphify.Constants.PHONE1_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.databinding.ActivityMainBinding
 import com.frank.glyphify.glyph.batteryindicator.BatteryIndicatorService
-import com.frank.glyphify.glyph.batteryindicator.PowerConnectionReceiver
-import com.frank.glyphify.glyph.notificationmanager.ExtendedEssentialService
 import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 
@@ -114,14 +105,6 @@ class MainActivity : AppCompatActivity() {
 
         setComposerAppVersion()
         createNotificationChannel()
-
-        val singleWorkReq = OneTimeWorkRequestBuilder<AppUpdater>()
-            .build()
-        WorkManager.getInstance(this).enqueue(singleWorkReq)
-
-        val periodicWorkRequest = PeriodicWorkRequest.Builder(AppUpdater::class.java, 4, TimeUnit.HOURS)
-            .build()
-        WorkManager.getInstance(this).enqueue(periodicWorkRequest)
 
         welcomeMsg()
 

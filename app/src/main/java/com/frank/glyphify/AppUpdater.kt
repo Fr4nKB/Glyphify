@@ -54,6 +54,7 @@ class AppUpdater(private val context: Context, workerParams: WorkerParameters):
             }
 
             if(update) {
+                Log.d("DEBUG", "UPDATE AVAILABLE")
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
                 val pendingIntent = PendingIntent.getActivity(context, 0, browserIntent,
                     PendingIntent.FLAG_IMMUTABLE)

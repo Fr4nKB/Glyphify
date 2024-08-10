@@ -10,9 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.frank.glyphify.Constants.DIMMING_VALUES
 import com.frank.glyphify.Constants.PHONE1_MODEL_ID
@@ -24,7 +26,7 @@ import com.frank.glyphify.databinding.FragmentHomeBinding
 import com.frank.glyphify.databinding.FragmentNotifications1Binding
 import com.frank.glyphify.databinding.FragmentNotifications2Binding
 import com.frank.glyphify.databinding.FragmentNotifications2aBinding
-import com.frank.glyphify.glyph.notificationmanager.ExtendedEssentialService
+import com.frank.glyphify.glyph.extendedessential.ExtendedEssentialService
 import com.frank.glyphify.ui.dialogs.Dialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -64,7 +66,13 @@ class NotificationsFragment: Fragment() {
                         putInt("zoneIndex", i)
                         putInt("glyphId", glyphId)
                     }
-                    findNavController().navigate(R.id.navigation_contacts_choice, bundle)
+                    val navOptions = NavOptions.Builder()
+                        .setEnterAnim(R.anim.fade_in)
+                        .setExitAnim(R.anim.fade_out)
+                        .setPopEnterAnim(R.anim.fade_in)
+                        .setPopExitAnim(R.anim.fade_out)
+                        .build()
+                    findNavController().navigate(R.id.navigation_contacts_choice, bundle, navOptions)
                 }
             }
 
@@ -159,7 +167,10 @@ class NotificationsFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        requireActivity().findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
+        val activity = requireActivity()
+        activity.findViewById<MaterialButton>(R.id.toolbar_btn_back).visibility = View.GONE
+        activity.findViewById<TextView>(R.id.toolbar_app_name).visibility = View.VISIBLE
+        activity.findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
     }
 
 }

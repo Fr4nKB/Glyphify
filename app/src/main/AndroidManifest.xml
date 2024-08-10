@@ -53,7 +53,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".glyph.batteryindicator.BootReceiver"
+        <receiver android:name=".BootReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -82,14 +82,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <receiver android:name=".glyph.notificationmanager.ExtendedEssentialReceiver" android:enabled="true" android:exported="false">
+        <receiver android:name=".glyph.extendedessential.ExtendedEssentialReceiver" android:enabled="true" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_OFF"/>
                 <action android:name="android.intent.action.USER_PRESENT"/>
             </intent-filter>
         </receiver>
 
-        <service android:name=".glyph.notificationmanager.ExtendedEssentialService"
+        <service android:name=".glyph.extendedessential.ExtendedEssentialService"
             android:label="@string/app_name"
             android:exported="false"
             android:foregroundServiceType="dataSync"

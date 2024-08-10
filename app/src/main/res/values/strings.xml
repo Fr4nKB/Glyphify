@@ -6,8 +6,6 @@
 
     <string name="btn_file_selection">Select a file</string>
     <string name="btn_desc_file_selection">Select a file</string>
-    <string name="btn_start">Start</string>
-    <string name="btn_stop">Stop</string>
     <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
     <string name="btn_apply_ringtone">Apply ringtone</string>
     <string name="btn_ee_static">STATIC</string>
@@ -44,6 +42,8 @@
     <string name="progress_text_1">Analysing your song…</string>
     <string name="progress_text_2">Creating unique animations</string>
     <string name="progress_text_3">Almost there…</string>
+
+    <string name="snackbar_long_tap_remove">Long tap to remove an element</string>
 
     <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
     <string name="support_paypal">Buy me a coffee</string>

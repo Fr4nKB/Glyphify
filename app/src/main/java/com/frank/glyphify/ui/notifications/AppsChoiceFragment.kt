@@ -15,6 +15,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -110,9 +111,20 @@ class AppsChoiceFragment: Fragment() {
         override fun getItemCount() = appDetails.size
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val btnBack = requireActivity().findViewById<MaterialButton>(R.id.toolbar_btn_back)
+        btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        requireActivity().findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
+        val activity = requireActivity()
+        activity.findViewById<MaterialButton>(R.id.toolbar_btn_back).visibility = View.VISIBLE
+        activity.findViewById<TextView>(R.id.toolbar_app_name).visibility = View.GONE
+        activity.findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
 
         val bottomNavigationView: BottomNavigationView = requireActivity().findViewById(R.id.nav_view)
         val menu: Menu = bottomNavigationView.menu

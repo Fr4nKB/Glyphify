@@ -43,14 +43,18 @@ object Dialog {
             button.backgroundTintList = null
         }
 
-        dialogView.findViewById<EditText>(R.id.editText)?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = !s.isNullOrEmpty()
-            }
+        val editText = dialogView.findViewById<EditText>(R.id.editText)
+        if(editText != null) {
+            dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = false
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {}
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = !s.isNullOrEmpty()
+                }
+            })
+        }
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
 
         delayEnableButtonId?.let {
             dialogView.findViewById<Button>(it).isEnabled = false

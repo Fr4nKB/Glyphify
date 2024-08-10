@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Glyphify</string>
+    <string name="title_home">Glyphifier</string>
+    <string name="title_ringtones">Klingeltöne</string>
+    <string name="title_notifications">Benachrichtigungen</string>
+
+    <string name="btn_file_selection">Datei wählen</string>
+    <string name="btn_desc_file_selection">Datei wählen</string>
+    <string name="msg_alert_output_name">GIB EINEN NAMEN FÜR DEINEN KLINGELTON EIN</string>
+    <string name="btn_apply_ringtone">Klingelton übernehmen</string>
+    <string name="btn_ee_static">STATISCH</string>
+    <string name="btn_ee_pulse">PULSIEREN</string>
+    <string name="btn_add_app">APP</string>
+
+    <string name="btn_share">Teilen</string>
+    <string name="btn_delete">Löschen</string>
+    <string name="btn_donate">Spenden</string>
+
+    <string name="toast_ringtone_applied">Standard Klingelton Äbernommen</string>
+    <string name="alert_msg_perm_settings">Diese App muss Systemeinstellungen ändern, um den Klingelton zu Übernehmen. Möchtest du dies erlauben?</string>
+    <string name="alert_msg_perm_notifications">Erlaube Benachrichtigungen wenn ein neues Update erscheint</string>
+    <string name="alert_msg_perm_contacts">Erlaube den Zugriff auf Kontakte, um eine Benachrichtigung von diesem Kontakt zu erkennen</string>
+    <string name="alert_msg_perm_notifications_listener">In diesem Bereich kannst du jede Glyph Zone für eine "Essential" Benachrichtigung nutzen: Tippe auf eine Glyph Zone, wähle einen Kontakt und jedes Mal wenn du eine Benachrichtigung von diesem Kontakt erhältst, wird das Glyph aufleuchten bis du die Benachrichtigung weg wischst oder beantwortest. Um dies zu nutzen, musst du der App erlauben Benachrichtigungen und Deine Kontakte zu lesen.</string>
+    <string name="alert_posbtn">OK</string>
+    <string name="alert_negbtn">Abbrechen</string>
+
+    <string name="title_new_version">Glyphify Update</string>
+    <string name="msg_new_version">Eine neue Version ist verfügbar, tippe zum Download bei GitHub</string>
+
+    <string name="title_foreground_notification">Mache Glyphs wieder nützlich</string>
+
+    <string name="toggle_expanded_title">ANZAHL DER ZONEN</string>
+    <string name="toggle_text_5zones">5 ZONEN</string>
+    <string name="toggle_text_33zones">33 ZONEN</string>
+
+    <string name="toggle_dimming_title">GLYPH INTENSITÄT</string>
+    <string name="toggle_text_dimming_low">NIEDRIG</string>
+    <string name="toggle_text_dimming_mid">MITTEL</string>
+    <string name="toggle_text_dimming_high">HOCH</string>
+    <string name="toggle_text_dimming_var">VARIABEL</string>
+
+    <string name="progress_text_1">Analysiere deinen Musiktitel…</string>
+    <string name="progress_text_2">Erstelle einzigartige Animationen</string>
+    <string name="progress_text_3">Fast geschafft…</string>
+
+    <string name="snackbar_long_tap_remove">Gedrückt halten, um einen Eintrag zu löschen</string>
+
+    <string name="support_me">Willkommen! Dies ist eine kostenlose und werbefreie App eines Studenten. Wenn du sie nützlich findest und deine Anerkennung zeigen möchtest, denke doch über eine kleine Spende nach oder vergib einen Stern für meine GitHub Repo. Jede Unterstützung ist willkommen. Danke fürs lesen!</string>
+    <string name="support_paypal">Gib einen Kaffee für mich aus</string>
+    <string name="support_github">Stern für meine Repo</string>
+</resources>

@@ -16,6 +16,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -220,7 +221,10 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        requireActivity().findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
+        val activity = requireActivity()
+        activity.findViewById<MaterialButton>(R.id.toolbar_btn_back).visibility = View.GONE
+        activity.findViewById<TextView>(R.id.toolbar_app_name).visibility = View.VISIBLE
+        activity.findViewById<LinearLayout>(R.id.toolbar_btns_wrapper).visibility = View.GONE
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

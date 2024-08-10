@@ -19,7 +19,7 @@ import android.os.PowerManager
 import android.util.Log
 import com.frank.glyphify.Constants.CHANNEL_ID
 import com.frank.glyphify.R
-import com.frank.glyphify.glyph.notificationmanager.ExtendedEssentialService
+import com.frank.glyphify.glyph.extendedessential.ExtendedEssentialService
 import com.nothing.ketchum.Common
 import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 
 
 class BatteryIndicatorService : Service() {
-    private lateinit var mGM: GlyphManager
+    private var mGM: GlyphManager? = null
     private var mCallback: GlyphManager.Callback? = null
     private lateinit var sensorEventListener: SensorEventListener
     private var lastShakeTime: Long = 0
@@ -85,15 +85,15 @@ class BatteryIndicatorService : Service() {
                     lastY = y
                     lastZ = z
 
-                    // check if the device is approximately horizontal
-                    if((Math.abs(z) - 9.8) < 1 && Math.abs(x) < 2 && Math.abs(y) < 2) {
+                    // check if the device is approximately horizontal and facing down
+                    if(z < -9.8 && (Math.abs(z) - 9.8) < 1 && Math.abs(x) < 2 && Math.abs(y) < 2) {
 
                         val currentTime = System.currentTimeMillis()
 
                         if(shakeForce > shakeThreshold && currentTime - lastShakeTime > 3500) {
                             lastShakeTime = currentTime
 
-                            val builder = mGM.glyphFrameBuilder
+                            val builder = mGM!!.glyphFrameBuilder
                             val batteryLevel = getBatteryPercentage(applicationContext)
                             val batteryIndicatorFrame = builder.buildChannel(Glyph.Code_23111.C_1).build()
 
@@ -103,8 +103,9 @@ class BatteryIndicatorService : Service() {
 
                                     if(!wakeLock.isHeld) wakeLock.acquire(wakeLockTime.toLong())
 
+                                    mGM?.openSession()
                                     for(i in 0..batteryLevel step 10) {
-                                        mGM.displayProgressAndToggle(
+                                        mGM?.displayProgressAndToggle(
                                             batteryIndicatorFrame,
                                             i,
                                             false)
@@ -113,11 +114,12 @@ class BatteryIndicatorService : Service() {
                                     }
 
                                     delay(3000)
-                                    mGM.turnOff()
+                                    mGM?.turnOff()
                                     signalEE()
                                 }
                                 finally {
                                     if(wakeLock.isHeld) wakeLock.release()
+                                    mGM?.closeSession()
                                 }
                             }
 
@@ -137,8 +139,11 @@ class BatteryIndicatorService : Service() {
     }
 
     private fun unregisterSensorListener() {
-        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensorManager.unregisterListener(sensorEventListener)
+        try {
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            sensorManager.unregisterListener(sensorEventListener)
+        }
+        catch (_: Exception) {}
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -153,6 +158,11 @@ class BatteryIndicatorService : Service() {
             val localGM = GlyphManager.getInstance(applicationContext)
             localGM?.init(mCallback)
             mGM = localGM
+
+            // turn off glyphs in case some of them were stuck
+            mGM?.openSession()
+            mGM?.turnOff()
+            mGM?.closeSession()
         }, 3 * 1000)
 
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -172,13 +182,13 @@ class BatteryIndicatorService : Service() {
 
     override fun onDestroy() {
         try {
-            mGM.turnOff()
-            mGM.closeSession()
+            mGM?.turnOff()
+            mGM?.closeSession()
         }
         catch (e: GlyphException) {
             Log.e(TAG, e.message!!)
         }
-        mGM.unInit()
+        mGM?.unInit()
 
         unregisterReceiver(powerConnectionReceiver)
         unregisterSensorListener()
@@ -189,22 +199,14 @@ class BatteryIndicatorService : Service() {
     private fun init() {
         mCallback = object : GlyphManager.Callback {
             override fun onServiceConnected(componentName: ComponentName) {
-                if (Common.is20111()) mGM.register(Common.DEVICE_20111)
-                if (Common.is22111()) mGM.register(Common.DEVICE_22111)
-                if (Common.is23111()) mGM.register(Common.DEVICE_23111)
-
-                try {
-                    mGM.openSession()
-                    mGM.turnOff()
-                }
-                catch (e: GlyphException) {
-                    Log.e(TAG, e.message!!)
-                }
+                if (Common.is20111()) mGM?.register(Common.DEVICE_20111)
+                if (Common.is22111()) mGM?.register(Common.DEVICE_22111)
+                if (Common.is23111()) mGM?.register(Common.DEVICE_23111)
             }
 
             override fun onServiceDisconnected(componentName: ComponentName) {
-                mGM.turnOff()
-                mGM.closeSession()
+                mGM?.turnOff()
+                mGM?.closeSession()
             }
         }
     }
@@ -217,7 +219,8 @@ class BatteryIndicatorService : Service() {
                 registerSensorListener()
             }
             else if(action == "POWER_OFF") {
-                mGM.turnOff()
+                mGM?.turnOff()
+                mGM?.closeSession()
                 unregisterSensorListener()
                 signalEE()
             }

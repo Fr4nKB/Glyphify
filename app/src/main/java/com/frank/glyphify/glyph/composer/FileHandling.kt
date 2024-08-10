@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Locale
 import java.util.zip.Deflater
+import java.util.zip.Inflater
 
 object FileHandling {
     fun getFileNameFromUri(context: Context, uri: Uri): String {
@@ -108,6 +109,38 @@ object FileHandling {
         val formattedData = base64Data.chunked(76).joinToString("\n")
 
         return "$formattedData\n"
+    }
+
+    /**
+     * Decodes a base64 string and then decompresses it using zlib
+     * @param base64Data: the base64 encoded and compressed data
+     * @return a string containing the original data
+     */
+    fun decodeAndDecompress(data: String): String {
+        // Remove newline characters
+        val base64Data = data.replace("\n", "")
+
+        // Add padding bytes
+        val padding = "=".repeat((4 - base64Data.length % 4) % 4)
+        val paddedBase64Data = base64Data + padding
+
+        // Decode from Base64
+        val compressedBytes = Base64.decode(paddedBase64Data, Base64.DEFAULT)
+
+        // Decompress the bytes
+        val inflater = Inflater()
+        inflater.setInput(compressedBytes)
+
+        val outputStream = ByteArrayOutputStream(compressedBytes.size)
+        val buffer = ByteArray(1024)
+        while (!inflater.finished()) {
+            val count = inflater.inflate(buffer)
+            outputStream.write(buffer, 0, count)
+        }
+        outputStream.close()
+        val decompressedBytes = outputStream.toByteArray()
+
+        return String(decompressedBytes, Charsets.UTF_8)
     }
 
 }
