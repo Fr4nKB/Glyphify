@@ -52,7 +52,7 @@ https://github.com/user-attachments/assets/2356ccf4-8219-457c-824b-2ed0e7514db2
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL)
 
 ## 制限付き設定の許可
-制限付き設定の許可を行なわないと通知のアクセス許可を操作できません。
+｢制限付き設定の許可｣を行なわないと通知のアクセス許可を操作できません。
 
 `設定` -> `アプリ` -> `最近開いたアプリ` -> `Glyphify` -> `3 つのドットメニューボタンをタップ` -> `制限付き設定を許可`
 
