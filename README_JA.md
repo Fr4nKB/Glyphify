@@ -1,5 +1,5 @@
 # Glyphify: 多目的な Glyph アプリ
-[English](./README.md)
+[English](./README.md) | [Deutsch](./README_DE.md)
 ## このアプリについて
 **Glyphify** は **Nothing Phone 用に作られた Android アプリ** で **Glyph インターフェースをより便利にする複数の機能を備えています**:
 
