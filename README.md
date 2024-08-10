@@ -48,6 +48,11 @@ A huge thanks to everyone which believes in this project and shows it by donatin
 <br><br>
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL)
 
+## Allow Restricted Settings
+Without "Allow Restricted Settings", notifications cannot be allowed.
+
+`Settings` -> `Apps` -> `Recently opend apps` -> `Glyphify` -> `Tap to 3Dot Menu` -> `Allow Restricted Settings`
+
 ## Download
 
 You can **download** the app from the [release](https://github.com/Fr4nKB/Glyphify/releases/latest) panel
