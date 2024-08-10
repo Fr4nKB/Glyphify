@@ -17,8 +17,8 @@
     <string name="btn_delete">Löschen</string>
     <string name="btn_donate">Spenden</string>
 
-    <string name="toast_ringtone_applied">Standard Klingelton Äbernommen</string>
-    <string name="alert_msg_perm_settings">Diese App muss Systemeinstellungen ändern, um den Klingelton zu Übernehmen. Möchtest du dies erlauben?</string>
+    <string name="toast_ringtone_applied">Standard Klingelton übernommen</string>
+    <string name="alert_msg_perm_settings">Diese App muss Systemeinstellungen ändern, um den Klingelton zu übernehmen. Möchtest du dies erlauben?</string>
     <string name="alert_msg_perm_notifications">Erlaube Benachrichtigungen wenn ein neues Update erscheint</string>
     <string name="alert_msg_perm_contacts">Erlaube den Zugriff auf Kontakte, um eine Benachrichtigung von diesem Kontakt zu erkennen</string>
     <string name="alert_msg_perm_notifications_listener">In diesem Bereich kannst du jede Glyph Zone für eine "Essential" Benachrichtigung nutzen: Tippe auf eine Glyph Zone, wähle einen Kontakt und jedes Mal wenn du eine Benachrichtigung von diesem Kontakt erhältst, wird das Glyph aufleuchten bis du die Benachrichtigung weg wischst oder beantwortest. Um dies zu nutzen, musst du der App erlauben Benachrichtigungen und Deine Kontakte zu lesen.</string>
