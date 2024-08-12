@@ -9,8 +9,6 @@
     <string name="btn_desc_file_selection">Datei wählen</string>
     <string name="msg_alert_output_name">GIB EINEN NAMEN FÜR DEINEN KLINGELTON EIN</string>
     <string name="btn_apply_ringtone">Klingelton übernehmen</string>
-    <string name="btn_ee_static">STATISCH</string>
-    <string name="btn_ee_pulse">PULSIEREN</string>
     <string name="btn_add_app">APP</string>
 
     <string name="btn_share">Teilen</string>
@@ -45,6 +43,15 @@
     <string name="progress_text_3">Fast geschafft…</string>
 
     <string name="snackbar_long_tap_remove">Gedrückt halten, um einen Eintrag zu löschen</string>
+
+    <string-array name="ee_animations_names">
+        <item>STATISCH</item>
+        <item>PULSIEREN</item>
+    </string-array>
+
+    <string-array name="ee_variable_animations_names">
+        <item>PING-PONG</item>
+    </string-array>
 
     <string name="support_me">Willkommen! Dies ist eine kostenlose und werbefreie App eines Studenten. Wenn du sie nützlich findest und deine Anerkennung zeigen möchtest, denke doch über eine kleine Spende nach oder vergib einen Stern für meine GitHub Repo. Jede Unterstützung ist willkommen. Danke fürs lesen!</string>
     <string name="support_paypal">Gib einen Kaffee für mich aus</string>

@@ -9,8 +9,6 @@
     <string name="btn_desc_file_selection">ファイルを選択</string>
     <string name="msg_alert_output_name">着信音の名前を入力してください</string>
     <string name="btn_apply_ringtone">着信音を適用</string>
-    <string name="btn_ee_static">静的</string>
-    <string name="btn_ee_pulse">パルス</string>
     <string name="btn_add_app">アプリ</string>
 
     <string name="btn_share">共有</string>
@@ -19,8 +17,8 @@
 
     <string name="toast_ringtone_applied">デフォルトの着信音を適用しました</string>
     <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
-    <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可する</string>
-    <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可する</string>
+    <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可してください。</string>
+    <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可してください。</string>
     <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">中止する</string>
@@ -45,6 +43,15 @@
     <string name="progress_text_3">あともう少しです…</string>
 
     <string name="snackbar_long_tap_remove">要素を削除するには長押ししてください</string>
+
+    <string-array name="ee_animations_names">
+        <item>静的</item>
+        <item>パルス</item>
+    </string-array>
+
+    <string-array name="ee_variable_animations_names">
+        <item>PING-PONG</item>
+    </string-array>
 
     <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
     <string name="support_paypal">コーヒーを買ってくれませんか</string>

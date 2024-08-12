@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -399,7 +400,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
 
             // insert 15 copies of element 3 between elements 3 and 4
             for (i in 0 until 15) {
-                expandedList.add(4, element3)
+                expandedList.add(3, element3)
             }
 
             // adjust the index for element 9 after the previous insertions
@@ -407,12 +408,18 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
 
             // insert 7 copies of element 9 between elements 9 and 10
             for (i in 0 until 7) {
-                expandedList.add(newElement9Index + 1, element9)
+                expandedList.add(newElement9Index, element9)
             }
+
+            // swap last element with 24th for dot glyph
+            val temp = expandedList[32]
+            expandedList[32] = expandedList[24]
+            expandedList[24] = temp
 
             expandedZones.add(Pair(timestamp, expandedList))
         }
 
+        Log.d("DEBUG", expandedZones.toString())
         return expandedZones
     }
 

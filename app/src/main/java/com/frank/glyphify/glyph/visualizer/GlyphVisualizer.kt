@@ -4,9 +4,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
-import com.frank.glyphify.Util.getGlyphMapping
 import com.frank.glyphify.glyph.composer.FileHandling.decodeAndDecompress
 import com.nothing.ketchum.Common
+import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphManager
 
@@ -14,6 +14,7 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
     private var mGM: GlyphManager? = null
     private var mCallback: GlyphManager.Callback? = null
 
+    private var numZones: Int = 5
     private var exitFlag: Boolean = false
 
     init {
@@ -29,14 +30,6 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
                 if (Common.is20111()) mGM?.register(Common.DEVICE_20111)
                 if (Common.is22111()) mGM?.register(Common.DEVICE_22111)
                 if (Common.is23111()) mGM?.register(Common.DEVICE_23111)
-
-                try {
-                    mGM?.openSession()
-                    mGM?.turnOff()
-                }
-                catch (e: GlyphException) {
-                    e.printStackTrace()
-                }
             }
 
             override fun onServiceDisconnected(componentName: ComponentName) {
@@ -44,6 +37,54 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
                 mGM?.closeSession()
             }
         }
+    }
+
+    private fun getGlyphMapping(index: Int,): List<Int> {
+        var glyphIndexes: List<Int>
+        when(index) {
+            0 -> {
+                if(Common.is22111()) {
+                    glyphIndexes = (Glyph.Code_22111.A1..Glyph.Code_22111.A2).toList()
+                }
+                else glyphIndexes = listOf(index)
+            }
+            1 -> {
+                if(Common.is22111()) {
+                    glyphIndexes = listOf(Glyph.Code_22111.B1)
+                }
+                else glyphIndexes = listOf(index)
+            }
+            2 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = (Glyph.Code_20111.C1..Glyph.Code_20111.C4).toList()
+                }
+                else if(Common.is22111()) {
+                    glyphIndexes = (Glyph.Code_22111.C1_1..Glyph.Code_22111.C6).toList()
+                }
+                else glyphIndexes = listOf(index)
+            }
+            3 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = (Glyph.Code_20111.D1_1..Glyph.Code_20111.D1_8).toList()
+                }
+                else if(Common.is22111()) {
+                    glyphIndexes = (Glyph.Code_22111.D1_1..Glyph.Code_22111.D1_8).toList()
+                }
+                else glyphIndexes = listOf(index)
+            }
+            4 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = listOf(Glyph.Code_20111.E1)
+                }
+                else if(Common.is22111()) {
+                    glyphIndexes = listOf(Glyph.Code_22111.E1)
+                }
+                else glyphIndexes = listOf(index)
+            }
+            else -> glyphIndexes = listOf(index)
+        }
+
+        return glyphIndexes
     }
 
     private fun getAuthorDataFromFile(filePath: String): String {
@@ -66,20 +107,25 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
                     .toIntArray()
             }
 
-        if (beats.isEmpty()) return
+        if(beats.isEmpty()) return
+        numZones = beats[0].size
 
         exitFlag = false
         Thread {
             var mediaPlayer: MediaPlayer? = null
             val sleepTime = 16_666_000L // 16.666 milliseconds
 
+            mGM?.openSession()
             for (beat in beats) {
                 val frame = mGM!!.glyphFrameBuilder
 
                 for ((zone, intensity) in beat.withIndex()) {
                     if (intensity != 0) {
-                        val glyphs = getGlyphMapping(zone)
-                        for (glyph in glyphs) frame.buildChannel(glyph, intensity)
+                        if(numZones == 5) {
+                            val glyphs = getGlyphMapping(zone)
+                            for (glyph in glyphs) frame.buildChannel(glyph, intensity)
+                        }
+                        else frame.buildChannel(zone, intensity)
                     }
                 }
 
@@ -100,7 +146,8 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
                 }
 
                 if (exitFlag) {
-                    mGM!!.turnOff()
+                    mGM?.turnOff()
+                    mGM?.closeSession()
                     mediaPlayer.stop()
                     mediaPlayer.release()
                     onFinished()
@@ -108,7 +155,8 @@ class GlyphVisualizer(private var context: Context): AutoCloseable {
                 }
             }
 
-            mGM!!.turnOff()
+            mGM?.turnOff()
+            mGM?.closeSession()
             mediaPlayer?.stop()
             mediaPlayer?.release()
             onFinished()

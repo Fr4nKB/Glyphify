@@ -17,20 +17,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_ee_mode"
+        <Spinner
+            android:id="@+id/spinner_ee_mode"
             android:layout_width="wrap_content"
-            android:layout_height="75dp"
-            android:maxLines="1"
-            android:text="@string/btn_ee_static"
+            android:layout_height="63dp"
             android:textSize="12sp"
-            app:backgroundTint="@color/black_russian"
-            app:cornerRadius="100dp"
+            android:gravity="center"
+            android:layout_margin="0dp"
+            app:backgroundTint="@color/red"
+            android:background="@drawable/rounded_button_gray"
             app:layout_constraintBottom_toTopOf="@id/recyclerView_contacts"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.1" />
+            app:layout_constraintVertical_bias="0.1"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_add_contact"
