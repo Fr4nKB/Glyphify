@@ -48,6 +48,11 @@ Ein riesiges Dankeschön an jeden, der an dieses Projekt glaubt und dies durch e
 <br><br>
 [![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=HJU8Y7F34Z6TL)
 
+## Eingeschränkte Einstellungen zulassen
+ohne "Eingeschränkte Einstellungen zulassen", können die Benachrichtigungen nicht angezeigt werden.
+
+`Einstellungen` -> `Apps` -> `Kürzlich geöffnete Apps` -> `Glyphify` -> `Tippe auf das 3-Punkte Menü` -> `Eingeschränkte Einstellungen zulassen`
+
 ## Download
 
 Du kannst die App im [release](https://github.com/Fr4nKB/Glyphify/releases/latest) Bereich **herunterladen**
