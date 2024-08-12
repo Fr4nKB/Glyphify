@@ -9,8 +9,6 @@
     <string name="btn_desc_file_selection">ファイルを選択</string>
     <string name="msg_alert_output_name">着信音の名前を入力してください</string>
     <string name="btn_apply_ringtone">着信音を適用</string>
-    <string name="btn_ee_static">静的</string>
-    <string name="btn_ee_pulse">パルス</string>
     <string name="btn_add_app">アプリ</string>
 
     <string name="btn_share">共有</string>
@@ -45,6 +43,15 @@
     <string name="progress_text_3">あともう少しです…</string>
 
     <string name="snackbar_long_tap_remove">要素を削除するには長押ししてください</string>
+
+    <string-array name="ee_animations_names">
+        <item>静的</item>
+        <item>パルス</item>
+    </string-array>
+
+    <string-array name="ee_variable_animations_names">
+        <item>PING-PONG</item>
+    </string-array>
 
     <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
     <string name="support_paypal">コーヒーを買ってくれませんか</string>

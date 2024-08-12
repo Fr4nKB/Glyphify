@@ -38,7 +38,7 @@ class NotificationsFragment: Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var numZones: Int = 11
-    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Boolean>>
+    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Int>>
     private lateinit var permHandler: PermissionHandling
 
     private fun loadContactsMapping() {

@@ -14,14 +14,17 @@ import android.provider.ContactsContract
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.frank.glyphify.Constants.CHANNEL_ID
+import com.frank.glyphify.Constants.EE_ANIMATIONS_NUM
 import com.frank.glyphify.Constants.GLYPH_DEFAULT_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MAX_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MID_INTENSITY
 import com.frank.glyphify.R
 import com.frank.glyphify.Util.fromStringToNum
-import com.frank.glyphify.Util.getGlyphMapping
 import com.frank.glyphify.Util.loadPreferences
+import com.frank.glyphify.glyph.extendedessential.Animations.knightRiderAnimation
+import com.frank.glyphify.glyph.extendedessential.Animations.pulseAnimation
 import com.nothing.ketchum.Common
+import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphException
 import com.nothing.ketchum.GlyphFrame
 import com.nothing.ketchum.GlyphManager
@@ -35,10 +38,12 @@ class ExtendedEssentialService: NotificationListenerService() {
     private var numZones: Int = 0
     private var intensity: Int = GLYPH_MID_INTENSITY
 
-    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Boolean>>
+    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Int>>
     private var activeNotifications = mutableMapOf<Int, MutableList<String>>()
-    private var activeZonesStatic = mutableListOf<Int>()
-    private var activeZonesPulse = mutableListOf<Int>()
+    private var activeAnimations = List(EE_ANIMATIONS_NUM) { mutableListOf<Int>() }
+    private val delayBetweenAnimations = 5000L
+    private val perStepDelay = 25L
+    private var stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
 
     private val serviceScope = CoroutineScope(Dispatchers.Default)
     private var serviceJob: Job? = null
@@ -52,14 +57,6 @@ class ExtendedEssentialService: NotificationListenerService() {
                 if (Common.is20111()) mGM?.register(Common.DEVICE_20111)
                 if (Common.is22111()) mGM?.register(Common.DEVICE_22111)
                 if (Common.is23111()) mGM?.register(Common.DEVICE_23111)
-
-                try {
-                    mGM?.openSession()
-                    mGM?.turnOff()
-                }
-                catch (e: GlyphException) {
-                    e.printStackTrace()
-                }
             }
 
             override fun onServiceDisconnected(componentName: ComponentName) {
@@ -67,6 +64,42 @@ class ExtendedEssentialService: NotificationListenerService() {
                 mGM?.closeSession()
             }
         }
+    }
+
+    private fun getGlyphMapping(index: Int): List<Int> {
+        val glyphIndexes: List<Int>
+        when(index) {
+            2 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = (Glyph.Code_20111.C1..Glyph.Code_20111.C4).toList()
+                }
+                else if(Common.is23111()) {
+                    glyphIndexes = (Glyph.Code_23111.C_1..Glyph.Code_23111.C_24).toList()
+                }
+                else glyphIndexes = listOf(index)
+            }
+            3 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = (Glyph.Code_20111.D1_1..Glyph.Code_20111.D1_8).toList()
+                }
+                else if(Common.is22111()) {
+                    glyphIndexes = (Glyph.Code_22111.C1_1..Glyph.Code_22111.C1_16).toList()
+                }
+                else glyphIndexes = listOf(index)
+            }
+            4 -> {
+                if(Common.is20111()) {
+                    glyphIndexes = listOf(Glyph.Code_20111.E1)
+                }
+                else glyphIndexes = listOf(index)
+            }
+            9 -> {
+                glyphIndexes = (Glyph.Code_22111.D1_1..Glyph.Code_22111.D1_8).toList()
+            }
+            else -> glyphIndexes = listOf(index)
+        }
+
+        return glyphIndexes
     }
 
     /**
@@ -118,7 +151,7 @@ class ExtendedEssentialService: NotificationListenerService() {
         else return Pair(2, senderName) // notification received
     }
 
-    private fun extractGlyphMappingFromContractName(contactName: String): Triple<Int, BigInteger, Boolean>? {
+    private fun extractGlyphMappingFromContractName(contactName: String): Triple<Int, BigInteger, Int>? {
         val cursor = contentResolver.query(
             ContactsContract.Contacts.CONTENT_URI,
             arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME),
@@ -127,14 +160,14 @@ class ExtendedEssentialService: NotificationListenerService() {
             null
         )
 
-        var mappingTriple: Triple<Int, BigInteger, Boolean>? = null
+        var mappingTriple: Triple<Int, BigInteger, Int>? = null
 
         if (cursor != null) {
             val contactIdIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID)
 
             while (cursor.moveToNext() && mappingTriple == null) {
                 val contactId = BigInteger(cursor.getString(contactIdIndex))
-                val foundTriple = (glyphsMapping as List<Triple<Int, List<BigInteger>, Boolean>>)
+                val foundTriple = (glyphsMapping as List<Triple<Int, List<BigInteger>, Int>>)
                     .find { it.second.contains(contactId) }
                 if (foundTriple != null) mappingTriple = Triple(foundTriple.first, contactId, foundTriple.third)
             }
@@ -145,61 +178,77 @@ class ExtendedEssentialService: NotificationListenerService() {
         return mappingTriple
     }
 
-    private fun extractGlyphMappingFromPackageName(packageName: String): Triple<Int, BigInteger, Boolean>? {
+    private fun extractGlyphMappingFromPackageName(packageName: String): Triple<Int, BigInteger, Int>? {
         val appId = fromStringToNum(packageName)
-        val foundTriple = (glyphsMapping as List<Triple<Int, List<BigInteger>, Boolean>>)
+        val foundTriple = (glyphsMapping as List<Triple<Int, List<BigInteger>, Int>>)
             .find { it.second.contains(appId) }
 
         return if (foundTriple != null) Triple(foundTriple.first, appId, foundTriple.third) else null
     }
 
     private fun showGlyphNotifications() {
-        var frameStatic: GlyphFrame.Builder
-        var framePulse: GlyphFrame.Builder
+        var staticFrame: GlyphFrame.Builder
+        val wakeLockTime = 5 * 60 * 1000L
 
         if(mGM == null) return
         mGM?.openSession()
 
-        frameStatic = mGM!!.glyphFrameBuilder
-        for(zone in activeZonesStatic) {
-            frameStatic = frameStatic.buildChannel(zone, intensity)
+        staticFrame = mGM!!.glyphFrameBuilder
+        for(zone in activeAnimations[0]) {
+            staticFrame = staticFrame.buildChannel(zone, intensity)
         }
 
-        // launch kotlin coroutine to play pulsing animation
-        if (activeZonesPulse.isNotEmpty() && serviceJob?.isActive != true) {
+        // launch kotlin coroutine to play dynamic animations
+        if (activeAnimations.drop(1).any { it.isNotEmpty() } && serviceJob?.isActive != true) {
             serviceJob = serviceScope.launch {
                 try {
-                    val wakeLockTime = 2 * 60 * 1000
-                    val delayBetweenAnimations = 4000L
-                    val perStepDelay = 25L
-                    val stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
 
                     // acquire wakelock to prevent phone from sleeping when animation is displayed
-                    if(!wakeLock.isHeld) wakeLock.acquire(wakeLockTime.toLong())
+                    if(!wakeLock.isHeld) wakeLock.acquire(wakeLockTime)
 
-                    // display animation a bunch of times
-                    for(i in 1 until (wakeLockTime / (intensity * perStepDelay / stepSize + delayBetweenAnimations))) {
 
-                        for (light in intensity downTo 0 step stepSize) {
+                    // display animations a bunch of times until wakelock expires
+                    for(i in 0..wakeLockTime step delayBetweenAnimations) {
 
-                            framePulse = frameStatic
-                            activeZonesPulse.forEach { zone ->
-                                framePulse = framePulse.buildChannel(zone, light)
+                        for(currTime in 0 until delayBetweenAnimations step perStepDelay) {
+
+                            var dynamicFrame = staticFrame
+                            for((index, glyphs) in activeAnimations.drop(1).withIndex()) {
+                                if(glyphs.isEmpty()) continue
+                                when(index) {
+                                    0 -> {
+                                        dynamicFrame = pulseAnimation(
+                                            dynamicFrame,
+                                            glyphs,
+                                            currTime,
+                                            intensity,
+                                            stepSize,
+                                            perStepDelay)
+                                    }
+                                    1 -> {
+                                        dynamicFrame = knightRiderAnimation(
+                                            dynamicFrame,
+                                            glyphs,
+                                            currTime,
+                                            intensity,
+                                            perStepDelay)
+                                    }
+                                }
                             }
 
-                            mGM?.toggle(framePulse.build())
+                            mGM?.toggle(dynamicFrame.build())
                             delay(perStepDelay)
                         }
 
-                        delay(delayBetweenAnimations)
                     }
 
                     // then switch to static glyph, this avoid acquiring wakelock for too long
-                    framePulse = frameStatic
-                    activeZonesPulse.forEach { zone ->
-                        framePulse = framePulse.buildChannel(zone)
+                    for(glyphs in activeAnimations.drop(1)) {
+                        for(glyph in glyphs) {
+                            staticFrame = staticFrame.buildChannel(glyph, intensity)
+                        }
                     }
-                    mGM?.toggle(framePulse.build())
+                    mGM?.toggle(staticFrame.build())
                 }
                 finally {
                     if(wakeLock.isHeld) wakeLock.release()
@@ -207,24 +256,24 @@ class ExtendedEssentialService: NotificationListenerService() {
             }
         }
         else {
-            // if coroutine is executing and no pulsing notifications are present, stop the coroutine
-            if(activeZonesPulse.isEmpty() && serviceJob?.isActive == true) {
+            // if coroutine is executing and no dynamic notifications are present, stop the coroutine
+            if(activeAnimations.drop(1).all { it.isEmpty() } && serviceJob?.isActive == true) {
                 serviceJob?.cancel()
                 if(wakeLock.isHeld) wakeLock.release()
             }
 
-            // no pulsing glyph, turn on glyph for static effect if any
-            if(activeZonesStatic.isNotEmpty()) {
-                mGM?.toggle(frameStatic.build())
+            // no dynamic animations, turn on glyph for static effect if any
+            if(activeAnimations[0].isNotEmpty()) {
+                mGM?.toggle(staticFrame.build())
             }
             else {
                 mGM?.turnOff()
-                mGM?.closeSession()
+                if(serviceJob?.isActive != true) mGM?.closeSession()
             }
         }
     }
 
-    private fun removeNotification(contactMapping: Triple<Int, String, Boolean>) {
+    private fun removeNotification(contactMapping: Triple<Int, String, Int>) {
         // turn off glyph only if there are no notifications from any of the mapped contacts
         activeNotifications[contactMapping.first]?.remove(contactMapping.second)
         if(activeNotifications[contactMapping.first]?.isEmpty() == true) {
@@ -232,10 +281,7 @@ class ExtendedEssentialService: NotificationListenerService() {
             val newZones = getGlyphMapping(contactMapping.first)
             var valueRemoved = false
 
-            if (activeZonesPulse.removeAll(newZones)) {
-                valueRemoved = true
-            }
-            if (activeZonesStatic.removeAll(newZones)) {
+            if (activeAnimations[contactMapping.third].removeAll(newZones)) {
                 valueRemoved = true
             }
 
@@ -244,21 +290,13 @@ class ExtendedEssentialService: NotificationListenerService() {
         }
     }
 
-    private fun updateActiveZones(index: Int, eeMode: Boolean) {
+    private fun updateActiveZones(index: Int, eeMode: Int) {
         val newZones = getGlyphMapping(index)
         var modified = false
 
-        if(eeMode) {
-            newZones.filter { it !in activeZonesPulse }.forEach {
-                activeZonesPulse.add(it)
-                modified = true
-            }
-        }
-        else {
-            newZones.filter { it !in activeZonesStatic }.forEach {
-                activeZonesStatic.add(it)
-                modified = true
-            }
+        newZones.filter { it !in activeAnimations[eeMode] }.forEach {
+            activeAnimations[eeMode].add(it)
+            modified = true
         }
 
         // avoid useless calls if nothing changed
@@ -267,7 +305,7 @@ class ExtendedEssentialService: NotificationListenerService() {
         }
     }
 
-    private fun testAndAdd2ActiveNotifications(glyphMapping: Triple<Int, String, Boolean>) {
+    private fun testAndAdd2ActiveNotifications(glyphMapping: Triple<Int, String, Int>) {
         if(!activeNotifications.containsKey(glyphMapping.first)
             || activeNotifications[glyphMapping.first]?.contains(glyphMapping.second) == false) {
 
@@ -313,7 +351,7 @@ class ExtendedEssentialService: NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         // get glyph mapping for app if it exists and update active zones
         val glyphAppMapping = extractGlyphMappingFromPackageName(sbn.packageName)
-        var appMapping: Triple<Int, String, Boolean>? = null
+        var appMapping: Triple<Int, String, Int>? = null
 
         // package name plus notification key to keep track of all notification from an app
         if(glyphAppMapping != null) {
@@ -404,6 +442,7 @@ class ExtendedEssentialService: NotificationListenerService() {
             }
             else if(action == "UPDATE_INTENSITY") {
                 intensity = intent.extras?.getInt("intensity")?: GLYPH_DEFAULT_INTENSITY
+                stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
             }
             else if(action == "SHOW_GLYPHS"
                 && extendedEssentialReceiver.isPhoneLocked()) {

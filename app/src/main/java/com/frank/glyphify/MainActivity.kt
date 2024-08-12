@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -20,8 +21,10 @@ import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2_MODEL_ID
 import com.frank.glyphify.databinding.ActivityMainBinding
 import com.frank.glyphify.glyph.batteryindicator.BatteryIndicatorService
+import com.frank.glyphify.glyph.visualizer.GlyphVisualizer
 import com.frank.glyphify.ui.dialogs.Dialog.supportMe
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.io.File
 import kotlin.random.Random
 
 
@@ -113,5 +116,4 @@ class MainActivity : AppCompatActivity() {
             startService(intent)
         }
     }
-
 }

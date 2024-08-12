@@ -8,8 +8,6 @@
     <string name="btn_desc_file_selection">Select a file</string>
     <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
     <string name="btn_apply_ringtone">Apply ringtone</string>
-    <string name="btn_ee_static">STATIC</string>
-    <string name="btn_ee_pulse">PULSE</string>
     <string name="btn_add_app">APP</string>
 
     <string name="btn_share">Share</string>
@@ -20,7 +18,7 @@
     <string name="alert_msg_perm_settings">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
     <string name="alert_msg_perm_notifications">Allow notifications to be notified when a new update is published</string>
     <string name="alert_msg_perm_contacts">Allow to read contacts in order to detect a notification from that contact</string>
-    <string name="alert_msg_perm_notifications_listener">This panel let\'s you chose any Glyph zone as a "Essential" notification: tap on a Glyph zone, select a contact and every time you get a notification from that contact the Glyph will stay on until you swipe or answer the notification. To do this you need to allow the app to read notifications and to read your contacts.</string>
+    <string name="alert_msg_perm_notifications_listener">This panel let\'s you chose any Glyph zone as a "Essential" notification: tap on a Glyph zone, select a contact and every time you get a notification from that contact the Glyph will stay on until you swipe or answer the notification. To do this you need to allow the app to read notifications and to read your contacts.\n\nBy attempting to allow the permission a \'Restricted settings\' dialog will popup, to allow the permission head into the Settings app -> Apps -> Glyphify -> three dots, then go back to Glyphify to allow the permission.\nThe three dots won\'t appear until the \'Restricted settings\' popup is shown.</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Abort</string>
 
@@ -44,6 +42,15 @@
     <string name="progress_text_3">Almost there…</string>
 
     <string name="snackbar_long_tap_remove">Long tap to remove an element</string>
+
+    <string-array name="ee_animations_names">
+        <item>STATIC</item>
+        <item>PULSE</item>
+    </string-array>
+
+    <string-array name="ee_variable_animations_names">
+        <item>PING-PONG</item>
+    </string-array>
 
     <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
     <string name="support_paypal">Buy me a coffee</string>

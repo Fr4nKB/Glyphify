@@ -17,7 +17,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -52,7 +55,7 @@ class ContactsChoiceFragment: Fragment() {
     private var zone = -1
     private var glyphId = -1
 
-    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Boolean>>
+    private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Int>>
     private lateinit var permHandler: PermissionHandling
 
     private lateinit var contactsAdapter: ContactsAdapter
@@ -114,32 +117,6 @@ class ContactsChoiceFragment: Fragment() {
         return contactName
     }
 
-    private fun setEEmode(btn: MaterialButton, invertCurrValue: Boolean) {
-        var currState = glyphsMapping[zone].third
-        if(invertCurrValue) currState = currState.not()
-
-        if(currState) {
-            btn.text = getString(R.string.btn_ee_pulse)
-            btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-            btn.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.red)
-        }
-        else {
-            btn.text = getString(R.string.btn_ee_static)
-            btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-            btn.backgroundTintList =
-                ContextCompat.getColorStateList(requireContext(), R.color.white)
-        }
-
-        glyphsMapping[zone] = Triple(
-            glyphsMapping[zone].first,
-            glyphsMapping[zone].second,
-            currState
-        )
-        savePreferences()
-
-    }
-
     private fun getAppInfo(id: BigInteger): Pair<String, Drawable> {
         val packageName = fromNumToString(id)
 
@@ -166,6 +143,42 @@ class ContactsChoiceFragment: Fragment() {
         val editor: SharedPreferences.Editor = sharedPref.edit()
         editor.putBoolean("firstusage", false)
         editor.apply()
+    }
+
+    private fun setupSpinner() {
+        val spinner = requireView().findViewById<Spinner>(R.id.spinner_ee_mode)
+        val eeAnimationsNames = resources.getStringArray(R.array.ee_animations_names)
+        val options = eeAnimationsNames.toMutableList()
+        if((numZones == 5 && zone == 3
+                    || (numZones == 11 && zone in listOf(3, 9))
+                    || (numZones == 3 && zone == 2))) {
+            val eeVariableAnimationsNames = resources.getStringArray(R.array.ee_variable_animations_names)
+            options.addAll(eeVariableAnimationsNames)
+        }
+
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, options)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        spinner.setSelection(glyphsMapping[zone].third)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                glyphsMapping[zone] = Triple(
+                    glyphsMapping[zone].first,
+                    glyphsMapping[zone].second,
+                    position
+                )
+                savePreferences()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                val defaultPosition = options.indexOf(eeAnimationsNames[0])
+                if (defaultPosition != -1) {
+                    spinner.setSelection(defaultPosition)
+                }
+            }
+        }
     }
 
     override fun onCreateView(
@@ -204,11 +217,7 @@ class ContactsChoiceFragment: Fragment() {
             permHandler.askRequiredPermissions(permissions, R.layout.dialog_perm_contacts)
         }
 
-        val btnEEmode = requireView().findViewById<MaterialButton>(R.id.btn_ee_mode)
-        setEEmode(btnEEmode, false)
-        btnEEmode.setOnClickListener {
-            setEEmode(btnEEmode, true)
-        }
+        setupSpinner()
 
         val btnAddContact = requireView().findViewById<MaterialButton>(R.id.btn_add_contact)
         btnAddContact.setOnClickListener {
