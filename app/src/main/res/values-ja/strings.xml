@@ -40,8 +40,8 @@
   <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
   <!--Notifications fragment-->
   <string name="btn_add_app">アプリ</string>
-  <string name="btn_sleep_mode_start">開始時間</string>
-  <string name="btn_sleep_mode_end">終了時間</string>
+  <string name="btn_sleep_mode_start">開始の時間</string>
+  <string name="btn_sleep_mode_end">終了の時間</string>
   <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可してください。</string>
   <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
   <string name="alert_msg_sleep_mode">拡張された Essential 通知を停止するスケジュールを指定します。</string>
