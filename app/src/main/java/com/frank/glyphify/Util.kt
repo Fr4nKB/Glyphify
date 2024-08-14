@@ -1,17 +1,23 @@
 package com.frank.glyphify
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
+import com.frank.glyphify.glyph.extendedessential.ExtendedEssentialService
 import com.nothing.ketchum.Common
 import com.nothing.ketchum.Glyph
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigInteger
+import java.util.Calendar
 
 object Util {
     fun loadPreferences(context: Context, numZones: Int): MutableList<Triple<Int, List<BigInteger>, Int>> {
@@ -68,5 +74,43 @@ object Util {
     fun fromNumToString(appId: BigInteger): String {
         return String((-appId).toByteArray())
     }
+
+    fun exactAlarm(context: Context, intentAction: String, setAction: Int) {
+        val sharedPref = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+        var time = ""
+        if(intentAction == "SLEEP_ON") time = sharedPref.getString("sleepStart", "") ?: ""
+        else if(intentAction == "SLEEP_OFF") time = sharedPref.getString("sleepEnd", "") ?: ""
+
+        if (time.isNotEmpty()) {
+            val timeParts = time.split(":")
+            val hour = timeParts[0].toInt()
+            val minute = timeParts[1].toInt()
+
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val intent = Intent(context, ExtendedEssentialService::class.java).apply {
+                action = intentAction
+            }
+            val pendingIntent = PendingIntent.getService(context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+            alarmManager.cancel(pendingIntent)
+            if(setAction in 1..2) {
+                val alarmTime: Long
+                if(setAction == 1) alarmTime = calendar.timeInMillis
+                else alarmTime = calendar.timeInMillis + AlarmManager.INTERVAL_DAY
+
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent)
+            }
+        }
+    }
+
 }
 

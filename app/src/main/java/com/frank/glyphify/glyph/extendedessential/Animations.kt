@@ -9,14 +9,19 @@ object Animations {
                        stepSize: Int, perStepDelay: Long): GlyphFrame.Builder {
 
         var dynamicFrame = frame
-        val light = maxOf(intensity - stepSize * (time / perStepDelay).toInt(), 0)
-        for(glyph in glyphs) {
+        val cycleDuration = 5000L // 5000ms cycle duration to ensure 4000ms between animations
+
+        val currentTick = time % cycleDuration
+
+        val light = maxOf(intensity - stepSize * (currentTick / perStepDelay).toInt(), 0)
+        for (glyph in glyphs) {
             dynamicFrame = dynamicFrame.buildChannel(glyph, light)
         }
+
         return dynamicFrame
     }
 
-    fun knightRiderAnimation(frame: GlyphFrame.Builder, glyphs: List<Int>, time: Long, intensity: Int,
+    fun pingPongAnimation(frame: GlyphFrame.Builder, glyphs: List<Int>, time: Long, intensity: Int,
                              perStepDelay: Long): GlyphFrame.Builder {
 
         val variableGlyphZones = MutableList(2) { mutableListOf<Int>() }

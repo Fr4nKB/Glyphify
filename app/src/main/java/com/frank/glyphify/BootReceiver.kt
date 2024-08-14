@@ -3,11 +3,13 @@ package com.frank.glyphify
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
+import com.frank.glyphify.Util.exactAlarm
 import com.frank.glyphify.glyph.batteryindicator.BatteryIndicatorService
 import java.util.concurrent.TimeUnit
 
@@ -29,6 +31,15 @@ class BootReceiver: BroadcastReceiver() {
             val periodicWorkRequest = PeriodicWorkRequest.Builder(AppUpdater::class.java, 4, TimeUnit.HOURS)
                 .build()
             WorkManager.getInstance(context).enqueue(periodicWorkRequest)
+
+            val sharedPref: SharedPreferences =
+                context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+            val isSleepModeActive = sharedPref.getBoolean("isSleepModeActive", false)
+            if(isSleepModeActive) {
+                exactAlarm(context, "SLEEP_ON", 1)
+                exactAlarm(context, "SLEEP_OFF", 1)
+            }
         }
 
     }

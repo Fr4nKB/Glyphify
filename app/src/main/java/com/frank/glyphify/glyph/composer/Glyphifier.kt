@@ -20,6 +20,7 @@ import com.frank.glyphify.Constants.GLYPHIFY_COMPOSER_PATTERN
 import com.frank.glyphify.Constants.LIGHT_DURATION_US
 import com.frank.glyphify.Constants.GLYPH_MAX_INTENSITY
 import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
+import com.frank.glyphify.R
 import com.frank.glyphify.glyph.composer.FileHandling.compressAndEncode
 import com.frank.glyphify.glyph.composer.FileHandling.getAudioDetails
 import com.frank.glyphify.glyph.composer.FileHandling.getFileExtension
@@ -58,7 +59,7 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
     private fun prepareInput(uri: Uri): Boolean {
         // get file extension
         val ext = getFileExtension(uri, context.contentResolver)
-        if (ext == "") throw RuntimeException("No such file")
+        if (ext == "") throw RuntimeException(context.getString(R.string.error_no_file))
 
         // create a local file from the uri so that ffmpeg can access it
         val tmpName = if(ext == "wav") "tempWav.$ext" else "temp.$ext"
@@ -72,13 +73,13 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
             outputStream.close()
         }
         catch (e: Exception) {
-            throw RuntimeException("Failed to load file")
+            throw RuntimeException(context.getString(R.string.error_failed_load))
         }
 
         // if the audio is not wav convert it using ffmpeg
         val session = FFmpegKit.execute("-i $path/$tmpName -ac 2 -ar 44100 $path/temp.wav -y")
         if(!ReturnCode.isSuccess(session.returnCode)){
-            throw RuntimeException("Failed conversion")
+            throw RuntimeException(context.getString(R.string.error_failed_conv_wav))
         }
         return true
     }
@@ -381,7 +382,6 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         return mergePairs(tmp)
     }
 
-
     /**
      * Expand the beats to work on the 33 zones of Phone(2)
      * @param beatsToExpand: beats map grouped by timestamp
@@ -548,64 +548,58 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
      * @param authorTag: compressed and encoded data for the Glyph show
      * @return true if successful, false otherwise
      * */
-    private fun buildOgg(outputName: String, custom1Tag: String, authorTag: String): Boolean {
-        val sharedPref: SharedPreferences =
+    private fun buildOgg(outputName: String, custom1Tag: String, authorTag: String) {
+        var sharedPref: SharedPreferences =
             context.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val appVers = sharedPref.getString("appVersion", "v1-Spacewar Glyph Composer")
 
-        try {
-            // convert from wav to ogg
-            val session = FFmpegKit.execute("-i $path/temp.wav -c:a libopus " +
-                    "-metadata COMPOSER='$appVers' " +
-                    "-metadata TITLE='$ALBUM_NAME' " +
-                    "-metadata ALBUM='$ALBUM_NAME' " +
-                    "-metadata CUSTOM1='$custom1Tag' " +
-                    "-metadata CUSTOM2='$numZones'cols " +
-                    "-metadata AUTHOR='$authorTag' " +
-                    "\"$path/$outputName.ogg\" -y")
+        // convert from wav to ogg
+        val session = FFmpegKit.execute("-i $path/temp.wav -c:a libopus " +
+                "-metadata COMPOSER='$appVers' " +
+                "-metadata TITLE='$ALBUM_NAME' " +
+                "-metadata ALBUM='$ALBUM_NAME' " +
+                "-metadata CUSTOM1='$custom1Tag' " +
+                "-metadata CUSTOM2='$numZones'cols " +
+                "-metadata AUTHOR='$authorTag' " +
+                "\"$path/$outputName.ogg\" -y")
 
-            if(!ReturnCode.isSuccess(session.returnCode)) return false
+        if(!ReturnCode.isSuccess(session.returnCode)) throw RuntimeException(context.getString(R.string.error_failed_create_comp))
 
-            // export ringtone to media store so that android OS can access it
-            // if name already in use the timestamp is appended at the end
-            val uniqueName = getUniqueName(outputName)
+        // export ringtone to media store so that android OS can access it
+        // if name already in use the timestamp is appended at the end
+        val uniqueName = getUniqueName(outputName)
 
-            val contentValues = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, "$uniqueName.ogg")
-                put(MediaStore.MediaColumns.MIME_TYPE, "audio/ogg")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RINGTONES + File.separator + "Compositions")
-                put(MediaStore.Audio.AudioColumns.COMPOSER, appVers)
-                put(MediaStore.Audio.AudioColumns.ALBUM, ALBUM_NAME)
-                put(MediaStore.Audio.AudioColumns.TITLE, ALBUM_NAME)
-                put(MediaStore.Audio.AudioColumns.IS_RINGTONE, true)
-                put(MediaStore.Audio.AudioColumns.ARTIST, authorTag)
-            }
-
-            val uri: Uri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
-                ?: throw RuntimeException("Failed to build ogg")
-
-            // save uri in the shared preferences so it can be later access to set the ringtone
-            val sharedPref: SharedPreferences = context.getSharedPreferences("URIS", Context.MODE_PRIVATE)
-            val editor: SharedPreferences.Editor = sharedPref.edit()
-            editor.putString(uniqueName, uri.toString())
-            editor.apply()
-
-            // copy data from local file to the exported one
-            val oggFile = File("$path/$outputName.ogg")
-
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                oggFile.inputStream().use { inputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-            }
-
-            // the ringtone has been exported, remove it from app's filesystem
-            oggFile.delete()
-            return true
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "$uniqueName.ogg")
+            put(MediaStore.MediaColumns.MIME_TYPE, "audio/ogg")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_RINGTONES + File.separator + "Compositions")
+            put(MediaStore.Audio.AudioColumns.COMPOSER, appVers)
+            put(MediaStore.Audio.AudioColumns.ALBUM, ALBUM_NAME)
+            put(MediaStore.Audio.AudioColumns.TITLE, ALBUM_NAME)
+            put(MediaStore.Audio.AudioColumns.IS_RINGTONE, true)
+            put(MediaStore.Audio.AudioColumns.ARTIST, authorTag)
         }
-        catch (e: Exception) {
-            throw (e)
+
+        val uri: Uri = context.contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
+            ?: throw RuntimeException(context.getString(R.string.error_failed_exporting_comp))
+
+        // save uri in the shared preferences so it can be later access to set the ringtone
+        sharedPref = context.getSharedPreferences("URIS", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPref.edit()
+        editor.putString(uniqueName, uri.toString())
+        editor.apply()
+
+        // copy data from local file to the exported one
+        val oggFile = File("$path/$outputName.ogg")
+
+        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+            oggFile.inputStream().use { inputStream ->
+                inputStream.copyTo(outputStream)
+            }
         }
+
+        // the ringtone has been exported, remove it from app's filesystem
+        oggFile.delete()
     }
 
     override fun doWork(): Result {
@@ -613,58 +607,56 @@ class Glyphifier(private val context: Context, workerParams: WorkerParameters):
         if(Build.MODEL == PHONE2A_MODEL_ID) numZones = 3
         else numZones = 5
 
-        // copy input file into app's filesystem and convert to wav
         try {
+            // copy input file into app's filesystem and convert to wav
             prepareInput(uri)
+            setProgressAsync(workDataOf("PROGRESS" to 5))
+
+            // get audio duration and sample rate
+            val audioInfo = getAudioDetails(context, "$path/temp.wav")
+
+            // build custom1 GLYPHIFY text for composer app
+            val custom1Tag = buildCustom1Tag(audioInfo.first)
+
+            setProgressAsync(workDataOf("PROGRESS" to 15))
+
+            // build led animation based on selected song
+            val rawBeats = BeatDetector.detectBeatsAndFrequencies(context, path, "temp.wav")
+            setProgressAsync(workDataOf("PROGRESS" to 30))
+
+            val normalizedBandsBeats = rawBeats.second.map { normalizeBeats(it) }
+            setProgressAsync(workDataOf("PROGRESS" to 35))
+
+            if(expanded) numZones = 11
+            var animatedBeats = separatePatterns(normalizedBandsBeats, rawBeats.first)
+            setProgressAsync(workDataOf("PROGRESS" to 70))
+
+            if(expanded) {      // if device is Phone(2), expand to 33 zones
+                animatedBeats = expandTo33Zones(animatedBeats)
+                numZones = 33
+                setProgressAsync(workDataOf("PROGRESS" to 75))
+            }
+            else if(numZones == 3) {
+                animatedBeats = expandTo26Zones(animatedBeats)
+                numZones = 26
+                setProgressAsync(workDataOf("PROGRESS" to 75))
+            }
+
+            val authorTag = buildAuthorTag(animatedBeats)
+            if (authorTag == "") return Result.failure()
+
+            setProgressAsync(workDataOf("PROGRESS" to 80))
+
+            // create ogg file which contains the Glyphified song
+            if(outName == null) throw RuntimeException(context.getString(R.string.error_no_output_name))
+            buildOgg(outName, custom1Tag, authorTag)
+
+            setProgressAsync(workDataOf("PROGRESS" to 100))
+            Thread.sleep(100)   // needed to show the progress bar at 100%
         }
         catch (e: Exception) {
-            return Result.failure()
+            return Result.failure(workDataOf("ERROR_MESSAGE" to e.message))
         }
-
-        setProgressAsync(workDataOf("PROGRESS" to 5))
-
-        // get audio duration and sample rate
-        val audioInfo = getAudioDetails("$path/temp.wav")
-        if (audioInfo.first == -1.0 || audioInfo.second == 1) return Result.failure()
-
-        // build custom1 GLYPHIFY text for composer app
-        val custom1Tag = buildCustom1Tag(audioInfo.first)
-
-        setProgressAsync(workDataOf("PROGRESS" to 15))
-
-        // build led animation based on selected song
-        val rawBeats = BeatDetector.detectBeatsAndFrequencies(context, path, "temp.wav")
-        setProgressAsync(workDataOf("PROGRESS" to 30))
-
-        val normalizedBandsBeats = rawBeats.second.map { normalizeBeats(it) }
-        setProgressAsync(workDataOf("PROGRESS" to 35))
-
-        if(expanded) numZones = 11
-        var animatedBeats = separatePatterns(normalizedBandsBeats, rawBeats.first)
-        setProgressAsync(workDataOf("PROGRESS" to 70))
-
-        if(expanded) {      // if device is Phone(2), expand to 33 zones
-            animatedBeats = expandTo33Zones(animatedBeats)
-            numZones = 33
-            setProgressAsync(workDataOf("PROGRESS" to 75))
-        }
-        else if(numZones == 3) {
-            animatedBeats = expandTo26Zones(animatedBeats)
-            numZones = 26
-            setProgressAsync(workDataOf("PROGRESS" to 75))
-        }
-
-        val authorTag = buildAuthorTag(animatedBeats)
-        if (authorTag == "") return Result.failure()
-
-        setProgressAsync(workDataOf("PROGRESS" to 80))
-
-        // create ogg file which contains the Glyphified song
-        if(outName == null) return Result.failure()
-        if(!buildOgg(outName, custom1Tag, authorTag)) return Result.failure()
-
-        setProgressAsync(workDataOf("PROGRESS" to 100))
-        Thread.sleep(100)   // needed to show the progress bar at 100%
 
         return Result.success()
     }

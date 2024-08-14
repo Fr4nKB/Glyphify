@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import android.util.Base64
 import android.webkit.MimeTypeMap
 import com.arthenica.ffmpegkit.FFprobeKit
+import com.frank.glyphify.R
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.Locale
@@ -58,10 +59,11 @@ object FileHandling {
      * @return duration and sample rate
      * @throws RuntimeException if something went wrong
      * */
-    fun getAudioDetails(filePath: String): Pair<Double, Int> {
+    fun getAudioDetails(context: Context, filePath: String): Pair<Double, Int> {
         try {
             val mediaInformation = FFprobeKit.getMediaInformation(filePath).mediaInformation
             val duration = mediaInformation.duration.toDouble()
+            if(duration > 30) throw RuntimeException(context.getString(R.string.error_duration_long))
 
             val streams = mediaInformation.streams
             for (stream in streams) {
@@ -71,8 +73,9 @@ object FileHandling {
                 }
             }
 
-            return Pair(-1.0, -1)
-        } catch (e: RuntimeException) {
+            throw RuntimeException(context.getString(R.string.error_invalid_audio_file))
+        }
+        catch (e: RuntimeException) {
             throw e
         }
     }

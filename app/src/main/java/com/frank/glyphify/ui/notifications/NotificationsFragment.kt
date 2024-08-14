@@ -1,8 +1,12 @@
 package com.frank.glyphify.ui.notifications
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -21,6 +25,7 @@ import com.frank.glyphify.Constants.PHONE1_MODEL_ID
 import com.frank.glyphify.Constants.PHONE2A_MODEL_ID
 import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
+import com.frank.glyphify.Util.exactAlarm
 import com.frank.glyphify.Util.loadPreferences
 import com.frank.glyphify.databinding.FragmentHomeBinding
 import com.frank.glyphify.databinding.FragmentNotifications1Binding
@@ -40,6 +45,7 @@ class NotificationsFragment: Fragment() {
     private var numZones: Int = 11
     private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Int>>
     private lateinit var permHandler: PermissionHandling
+    private lateinit var sharedPref: SharedPreferences
 
     private fun loadContactsMapping() {
         val buttonContainer: ViewGroup = requireView().findViewById(R.id.buttonContainer)
@@ -101,6 +107,38 @@ class NotificationsFragment: Fragment() {
         )
     }
 
+    private fun showSleepModeDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_sleep_mode, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        val btnSetStartTime = dialogView.findViewById<MaterialButton>(R.id.btn_set_start_time)
+        val btnSetEndTime = dialogView.findViewById<MaterialButton>(R.id.btn_set_end_time)
+
+        val currStartTime = sharedPref.getString("sleepStart", "")
+        val currEndTime = sharedPref.getString("sleepEnd", "")
+
+        btnSetStartTime.text = getString(R.string.btn_sleep_mode_start) + ": " + currStartTime
+        btnSetEndTime.text = getString(R.string.btn_sleep_mode_end) + ": " + currEndTime
+
+        btnSetStartTime.setOnClickListener {
+            TimePickerFragment(requireContext(), "sleepStart", btnSetStartTime).show(requireActivity().supportFragmentManager, "sleepMode")
+        }
+
+        btnSetEndTime.setOnClickListener {
+            TimePickerFragment(requireContext(), "sleepEnd", btnSetEndTime).show(requireActivity().supportFragmentManager, "sleepMode")
+        }
+
+        dialog.show()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+    private fun setBtnSleepModeColor(bnt: MaterialButton, isSleepModeEnabled: Boolean) {
+        val colorId = if(isSleepModeEnabled) R.color.red else R.color.black_russian
+        bnt.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), colorId))
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -140,11 +178,10 @@ class NotificationsFragment: Fragment() {
         }
         else loadContactsMapping()
 
-        val sharedPref: SharedPreferences =
-            requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
+        sharedPref = requireContext().getSharedPreferences("settings", Context.MODE_PRIVATE)
 
         val dimmingToggle = requireView().findViewById<MaterialButtonToggleGroup>(R.id.dimming_toggle)
-        var lastSelectionToggleId = sharedPref.getInt("dimming_ee_toggle_id", R.id.dimming_toggle_mid)
+        val lastSelectionToggleId = sharedPref.getInt("dimming_ee_toggle_id", R.id.dimming_toggle_mid)
 
         dimmingToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -162,8 +199,32 @@ class NotificationsFragment: Fragment() {
         }
 
         dimmingToggle.check(lastSelectionToggleId)
-    }
 
+        val btnSleepMode = requireView().findViewById<MaterialButton>(R.id.btn_sleep_mode)
+        val isSleepModeActive = sharedPref.getBoolean("isSleepModeActive", false)
+        setBtnSleepModeColor(btnSleepMode, isSleepModeActive)
+
+        btnSleepMode.setOnClickListener {
+            val editor: SharedPreferences.Editor = sharedPref.edit()
+            editor.putBoolean("isSleepModeActive", true)
+            editor.apply()
+
+            setBtnSleepModeColor(btnSleepMode, true)
+            showSleepModeDialog()
+        }
+
+        btnSleepMode.setOnLongClickListener {
+            exactAlarm(requireContext(), "SLEEP_ON", 0)
+            exactAlarm(requireContext(), "SLEEP_OFF", 0)
+
+            val editor: SharedPreferences.Editor = sharedPref.edit()
+            editor.putBoolean("isSleepModeActive", false)
+            editor.apply()
+
+            setBtnSleepModeColor(btnSleepMode, false)
+            true
+        }
+    }
 
     override fun onResume() {
         super.onResume()
