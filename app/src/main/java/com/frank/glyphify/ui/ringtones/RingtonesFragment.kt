@@ -38,6 +38,7 @@ class RingtonesFragment : Fragment() {
 
     private lateinit var gv: GlyphVisualizer
     private var playing = false
+    private lateinit var sharedPref: SharedPreferences
 
     private fun showPermissionDialog(context: Context) {
         Dialog.showDialog(
@@ -78,10 +79,23 @@ class RingtonesFragment : Fragment() {
         var files = directory.listFiles()
         if(files == null) files = emptyArray<File>()
 
-        // Create an adapter for the RecyclerView
+        sharedPref = requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
+
+        // remove URIs belonging to files not existing anymore
+        val storedFilesName = sharedPref.all.keys
+        val editor = sharedPref.edit()
+        for(name in storedFilesName) {
+            val fileExists = files.any { it.nameWithoutExtension == name }
+            if(!fileExists) {
+                editor.remove(name)
+            }
+        }
+        editor.apply()
+
+        // create an adapter for the RecyclerView
         val adapter = FilesAdapter(files)
 
-        // Set the adapter to the RecyclerView
+        // set the adapter to the RecyclerView
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -221,8 +235,6 @@ class RingtonesFragment : Fragment() {
                 val toastMSG = requireContext().getString(R.string.toast_ringtone_applied)
                 val ringtoneType = RingtoneManager.TYPE_RINGTONE
 
-                val sharedPref: SharedPreferences =
-                    requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
                 val uri = Uri.parse(sharedPref.getString(file.nameWithoutExtension, null))
 
                 requireContext().contentResolver.openOutputStream(uri!!).use { os ->
@@ -277,9 +289,7 @@ class RingtonesFragment : Fragment() {
         val fileName = file.nameWithoutExtension
 
         if(file.delete()) {
-            //remove Uri from shared pref
-            val sharedPref: SharedPreferences =
-                requireContext().getSharedPreferences("URIS", Context.MODE_PRIVATE)
+            // remove Uri from shared pref
             val editor = sharedPref.edit()
             editor.remove(fileName)
             editor.apply()

@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import com.frank.glyphify.PermissionHandling
 import com.frank.glyphify.R
 
@@ -26,7 +27,8 @@ object Dialog {
         isCancelable: Boolean = true,
         delayEnableButtonId: Int? = null,
         delayMillis: Long = 0,
-        onDismiss: (() -> Unit)? = null
+        onDismiss: (() -> Unit)? = null,
+        errorMsg: String? = null,
     ) {
         val dialogView = LayoutInflater.from(context).inflate(layoutId, null)
         val dialog = AlertDialog.Builder(context)
@@ -43,6 +45,13 @@ object Dialog {
             button.backgroundTintList = null
         }
 
+        if(errorMsg != null) {
+            val errorMessage = dialogView.findViewById<TextView>(R.id.error_message)
+            if(errorMessage != null) {
+                errorMessage.text = errorMsg
+            }
+        }
+
         val editText = dialogView.findViewById<EditText>(R.id.editText)
         if(editText != null) {
             dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = false
@@ -50,11 +59,12 @@ object Dialog {
                 override fun afterTextChanged(s: Editable?) {}
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = !s.isNullOrEmpty()
+                    if (s != null) {
+                        dialogView.findViewById<Button>(R.id.positiveButton).isEnabled = s.isNotBlank()
+                    }
                 }
             })
         }
-
 
         delayEnableButtonId?.let {
             dialogView.findViewById<Button>(it).isEnabled = false

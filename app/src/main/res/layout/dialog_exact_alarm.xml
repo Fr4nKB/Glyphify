@@ -11,21 +11,9 @@
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
         android:textSize="16dp"
-        android:text="@string/alert_msg_output_name" />
+        android:text="palle" />
 
-    <EditText
-        android:id="@+id/editText"
-        android:backgroundTint="@color/grey"
-        android:textCursorDrawable="@null"
-        android:textColor="@color/white"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_- ()"
-        android:inputType="text"/>
 
     <Button
         android:id="@+id/positiveButton"
@@ -43,7 +31,6 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/rounded_button_gray"
         android:backgroundTint="@null"
-        android:stateListAnimator="@null"
         android:text="@string/alert_negbtn" />
 
 </LinearLayout>

@@ -128,11 +128,24 @@ class HomeFragment : Fragment() {
                             glyphifyBtn.visibility = View.GONE
                             glyphifyBtn.isEnabled = true
 
-                            //  randomly show support dialog
-                            val randomNumber = Random.nextInt(0, 5)
-                            if(randomNumber == 2) {
-                                val permHandler = PermissionHandling(requireActivity())
-                                supportMe(requireContext(), permHandler)
+                            val errorMessage = workInfo.outputData.getString("ERROR_MESSAGE")
+                            if(errorMessage != null) {
+                                Dialog.showDialog(
+                                    requireContext(),
+                                    R.layout.dialog_error,
+                                    mapOf(
+                                        R.id.positiveButton to {}
+                                    ),
+                                    errorMsg = errorMessage
+                                )
+                            }
+                            else {
+                                //  randomly show support dialog
+                                val randomNumber = Random.nextInt(0, 5)
+                                if(randomNumber == 2) {
+                                    val permHandler = PermissionHandling(requireActivity())
+                                    supportMe(requireContext(), permHandler)
+                                }
                             }
                         }
                     }

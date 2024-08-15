@@ -1,35 +1,68 @@
 <resources>
+    <!--General-->
     <string name="app_name">Glyphify</string>
+
     <string name="title_home">Glyphifier</string>
     <string name="title_ringtones">Ringtones</string>
     <string name="title_notifications">Notifications</string>
 
-    <string name="btn_file_selection">Select a file</string>
-    <string name="btn_desc_file_selection">Select a file</string>
-    <string name="msg_alert_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
-    <string name="btn_apply_ringtone">Apply ringtone</string>
-    <string name="btn_add_app">APP</string>
-
-    <string name="btn_share">Share</string>
-    <string name="btn_delete">Delete</string>
-    <string name="btn_donate">Donate</string>
-
-    <string name="toast_ringtone_applied">Default ringtone applied</string>
-    <string name="alert_msg_perm_settings">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
-    <string name="alert_msg_perm_notifications">Allow notifications to be notified when a new update is published</string>
-    <string name="alert_msg_perm_contacts">Allow to read contacts in order to detect a notification from that contact</string>
-    <string name="alert_msg_perm_notifications_listener">This panel let\'s you chose any Glyph zone as a "Essential" notification: tap on a Glyph zone, select a contact and every time you get a notification from that contact the Glyph will stay on until you swipe or answer the notification. To do this you need to allow the app to read notifications and to read your contacts.\n\nBy attempting to allow the permission a \'Restricted settings\' dialog will popup, to allow the permission head into the Settings app -> Apps -> Glyphify -> three dots, then go back to Glyphify to allow the permission.\nThe three dots won\'t appear until the \'Restricted settings\' popup is shown.</string>
     <string name="alert_posbtn">OK</string>
     <string name="alert_negbtn">Abort</string>
 
+    <string name="title_foreground_notification">Making Glyphs useful again</string>
     <string name="title_new_version">Glyphify update</string>
+
     <string name="msg_new_version">A new version is available, tap to download on GitHub</string>
 
-    <string name="title_foreground_notification">Making Glyphs useful again</string>
+    <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
+    <string name="support_paypal">Buy me a coffee</string>
+    <string name="support_github">Star my repo</string>
+
+
+    <!--Home fragment-->
+    <string name="btn_file_selection">Select a file</string>
+    <string name="btn_donate">Donate</string>
+
+    <string name="alert_msg_output_name">ENTER A NAME FOR YOUR RINGTONE</string>
+    <string name="alert_msg_perm_notifications">Allow notifications to be notified when a new update is published</string>
 
     <string name="toggle_expanded_title">NUMBER OF ZONES</string>
     <string name="toggle_text_5zones">5 ZONES</string>
     <string name="toggle_text_33zones">33 ZONES</string>
+
+    <string name="progress_text_1">Analysing your song…</string>
+    <string name="progress_text_2">Creating unique animations</string>
+    <string name="progress_text_3">Almost there…</string>
+
+    <string name="error_duration_long">Please select an audio file of maximum 30 seconds</string>
+    <string name="error_invalid_audio_file">Please select an audio file</string>
+    <string name="error_no_file">No such file</string>
+    <string name="error_failed_load">Failed at loading the file</string>
+    <string name="error_failed_conv_wav">Conversion to a WAV file failed</string>
+    <string name="error_failed_create_comp">Creation of composition failed</string>
+    <string name="error_failed_exporting_comp">Failed at exporting the composition into a ringtone</string>
+    <string name="error_no_output_name">No name was provided for the ringtone</string>
+
+
+    <!--Ringtones fragment-->
+    <string name="btn_apply_ringtone">Apply ringtone</string>
+    <string name="btn_share">Share</string>
+    <string name="btn_delete">Delete</string>
+
+    <string name="toast_ringtone_applied">Default ringtone applied</string>
+    <string name="alert_msg_perm_settings">This app needs to change system settings in order to apply the ringtone. Do you want to allow this?</string>
+
+
+    <!--Notifications fragment-->
+    <string name="btn_add_app">APP</string>
+    <string name="btn_sleep_mode_start">Start time</string>
+    <string name="btn_sleep_mode_end">End time</string>
+
+    <string name="alert_msg_perm_contacts">Allow to read contacts in order to detect a notification from that contact</string>
+    <string name="alert_msg_perm_notifications_listener">This panel let\'s you chose any Glyph zone as a "Essential" notification: tap on a Glyph zone, select a contact and every time you get a notification from that contact the Glyph will stay on until you swipe or answer the notification. To do this you need to allow the app to read notifications and to read your contacts.\n\nBy attempting to allow the permission a \'Restricted settings\' dialog will popup, to allow the permission head into the Settings app -> Apps -> Glyphify -> three dots, then go back to Glyphify to allow the permission.\nThe three dots won\'t appear until the \'Restricted settings\' popup is shown.</string>
+    <string name="alert_msg_sleep_mode">Schedule Extended Essential to turn off at a set time</string>
+
+    <string name="title_sleep_mode">SLEEP MODE</string>
 
     <string name="toggle_dimming_title">GLYPH INTENSITY</string>
     <string name="toggle_text_dimming_low">LOW</string>
@@ -37,22 +70,12 @@
     <string name="toggle_text_dimming_high">HIGH</string>
     <string name="toggle_text_dimming_var">VARIABLE</string>
 
-    <string name="progress_text_1">Analysing your song…</string>
-    <string name="progress_text_2">Creating unique animations</string>
-    <string name="progress_text_3">Almost there…</string>
-
     <string name="snackbar_long_tap_remove">Long tap to remove an element</string>
 
     <string-array name="ee_animations_names">
         <item>STATIC</item>
         <item>PULSE</item>
+        <item>!PING-PONG</item>
     </string-array>
 
-    <string-array name="ee_variable_animations_names">
-        <item>PING-PONG</item>
-    </string-array>
-
-    <string name="support_me">Welcome! This a free to use and ad-free app made by a student. If you find value in my work and would like to show your appreciation, consider making a donation or giving a star to my GitHub repo. Any support is appreciated, thanks for reading this!</string>
-    <string name="support_paypal">Buy me a coffee</string>
-    <string name="support_github">Star my repo</string>
 </resources>

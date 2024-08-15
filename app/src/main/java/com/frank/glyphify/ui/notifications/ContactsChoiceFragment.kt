@@ -22,7 +22,6 @@ import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.NavOptions
@@ -146,16 +145,18 @@ class ContactsChoiceFragment: Fragment() {
     }
 
     private fun setupSpinner() {
-        val spinner = requireView().findViewById<Spinner>(R.id.spinner_ee_mode)
+
         val eeAnimationsNames = resources.getStringArray(R.array.ee_animations_names)
-        val options = eeAnimationsNames.toMutableList()
-        if((numZones == 5 && zone == 3
+        val (variableOptions, options) = eeAnimationsNames.partition { it.startsWith("!") }
+            .let { it.first.toMutableList() to it.second.toMutableList() }
+
+        if ((numZones == 5 && zone == 3
                     || (numZones == 11 && zone in listOf(3, 9))
                     || (numZones == 3 && zone == 2))) {
-            val eeVariableAnimationsNames = resources.getStringArray(R.array.ee_variable_animations_names)
-            options.addAll(eeVariableAnimationsNames)
+            options.addAll(variableOptions.map { it.removePrefix("!") })
         }
 
+        val spinner = requireView().findViewById<Spinner>(R.id.spinner_ee_mode)
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, options)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter

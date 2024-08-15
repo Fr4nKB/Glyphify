@@ -19,9 +19,10 @@ import com.frank.glyphify.Constants.GLYPH_DEFAULT_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MAX_INTENSITY
 import com.frank.glyphify.Constants.GLYPH_MID_INTENSITY
 import com.frank.glyphify.R
+import com.frank.glyphify.Util.exactAlarm
 import com.frank.glyphify.Util.fromStringToNum
 import com.frank.glyphify.Util.loadPreferences
-import com.frank.glyphify.glyph.extendedessential.Animations.knightRiderAnimation
+import com.frank.glyphify.glyph.extendedessential.Animations.pingPongAnimation
 import com.frank.glyphify.glyph.extendedessential.Animations.pulseAnimation
 import com.nothing.ketchum.Common
 import com.nothing.ketchum.Glyph
@@ -41,7 +42,6 @@ class ExtendedEssentialService: NotificationListenerService() {
     private lateinit var glyphsMapping: MutableList<Triple<Int, List<BigInteger>, Int>>
     private var activeNotifications = mutableMapOf<Int, MutableList<String>>()
     private var activeAnimations = List(EE_ANIMATIONS_NUM) { mutableListOf<Int>() }
-    private val delayBetweenAnimations = 5000L
     private val perStepDelay = 25L
     private var stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
 
@@ -50,6 +50,8 @@ class ExtendedEssentialService: NotificationListenerService() {
     private lateinit var wakeLock: PowerManager.WakeLock
 
     private lateinit var extendedEssentialReceiver: ExtendedEssentialReceiver
+
+    private var sleeping = false
 
     private fun init() {
         mCallback = object : GlyphManager.Callback {
@@ -127,16 +129,8 @@ class ExtendedEssentialService: NotificationListenerService() {
      * name
      * */
     private fun isMessage(sbn: StatusBarNotification): Pair<Int, String?>? {
-        val packageName = sbn.packageName
-
-        // check if the notification is from a messaging app
-        if(packageName !in listOf(
-                "com.google.android.apps.messaging", "com.whatsapp", "org.telegram.messenger")) {
-            return null
-        }
-
         val senderName = sbn.notification.extras.getString(Notification.EXTRA_TITLE)
-        if (senderName == null || senderName in listOf("WhatsApp", "Telegram")) return null
+        if (senderName == null || sbn.tag == null) return null
 
         val peopleList = sbn.notification.extras.getParcelableArrayList("android.people.list", Person::class.java)
         var contactName: String? = null
@@ -206,40 +200,35 @@ class ExtendedEssentialService: NotificationListenerService() {
                     // acquire wakelock to prevent phone from sleeping when animation is displayed
                     if(!wakeLock.isHeld) wakeLock.acquire(wakeLockTime)
 
-
                     // display animations a bunch of times until wakelock expires
-                    for(i in 0..wakeLockTime step delayBetweenAnimations) {
+                    for(currTime in 0 until wakeLockTime step perStepDelay) {
 
-                        for(currTime in 0 until delayBetweenAnimations step perStepDelay) {
-
-                            var dynamicFrame = staticFrame
-                            for((index, glyphs) in activeAnimations.drop(1).withIndex()) {
-                                if(glyphs.isEmpty()) continue
-                                when(index) {
-                                    0 -> {
-                                        dynamicFrame = pulseAnimation(
-                                            dynamicFrame,
-                                            glyphs,
-                                            currTime,
-                                            intensity,
-                                            stepSize,
-                                            perStepDelay)
-                                    }
-                                    1 -> {
-                                        dynamicFrame = knightRiderAnimation(
-                                            dynamicFrame,
-                                            glyphs,
-                                            currTime,
-                                            intensity,
-                                            perStepDelay)
-                                    }
+                        var dynamicFrame = staticFrame
+                        for((index, glyphs) in activeAnimations.drop(1).withIndex()) {
+                            if(glyphs.isEmpty()) continue
+                            when(index) {
+                                0 -> {
+                                    dynamicFrame = pulseAnimation(
+                                        dynamicFrame,
+                                        glyphs,
+                                        currTime,
+                                        intensity,
+                                        stepSize,
+                                        perStepDelay)
+                                }
+                                1 -> {
+                                    dynamicFrame = pingPongAnimation(
+                                        dynamicFrame,
+                                        glyphs,
+                                        currTime,
+                                        intensity,
+                                        perStepDelay)
                                 }
                             }
-
-                            mGM?.toggle(dynamicFrame.build())
-                            delay(perStepDelay)
                         }
 
+                        mGM?.toggle(dynamicFrame.build())
+                        delay(perStepDelay)
                     }
 
                     // then switch to static glyph, this avoid acquiring wakelock for too long
@@ -286,7 +275,9 @@ class ExtendedEssentialService: NotificationListenerService() {
             }
 
             // avoid useless calls if nothing changed
-            if (valueRemoved && extendedEssentialReceiver.isPhoneLocked()) showGlyphNotifications()
+            if (valueRemoved && extendedEssentialReceiver.isPhoneLocked() && !sleeping) {
+                showGlyphNotifications()
+            }
         }
     }
 
@@ -300,7 +291,7 @@ class ExtendedEssentialService: NotificationListenerService() {
         }
 
         // avoid useless calls if nothing changed
-        if(modified && extendedEssentialReceiver.isPhoneLocked()) {
+        if(modified && extendedEssentialReceiver.isPhoneLocked() && !sleeping) {
             showGlyphNotifications()
         }
     }
@@ -429,7 +420,7 @@ class ExtendedEssentialService: NotificationListenerService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if(intent != null) {
             val action = intent.action
-            if(action == "PHONE_LOCKED") {
+            if(action == "PHONE_LOCKED" && !sleeping) {
                 showGlyphNotifications()
             }
             else if(action == "PHONE_UNLOCKED") {
@@ -445,8 +436,22 @@ class ExtendedEssentialService: NotificationListenerService() {
                 stepSize = 100 * intensity/GLYPH_MAX_INTENSITY
             }
             else if(action == "SHOW_GLYPHS"
-                && extendedEssentialReceiver.isPhoneLocked()) {
+                && extendedEssentialReceiver.isPhoneLocked() && !sleeping) {
                 showGlyphNotifications()
+            }
+            else if(action == "SLEEP_ON") {
+                serviceJob?.cancel()
+                mGM?.turnOff()
+                mGM?.closeSession()
+                sleeping = true
+
+                exactAlarm(this, "SLEEP_ON", 2)
+            }
+            else if(action == "SLEEP_OFF") {
+                sleeping = false
+                if(extendedEssentialReceiver.isPhoneLocked()) showGlyphNotifications()
+
+                exactAlarm(this, "SLEEP_OFF", 2)
             }
         }
 
