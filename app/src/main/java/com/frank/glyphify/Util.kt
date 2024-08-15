@@ -10,10 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
 import com.frank.glyphify.glyph.extendedessential.ExtendedEssentialService
-import com.nothing.ketchum.Common
-import com.nothing.ketchum.Glyph
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigInteger

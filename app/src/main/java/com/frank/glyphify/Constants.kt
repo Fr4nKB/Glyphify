@@ -17,6 +17,6 @@ object Constants {
     val PHONE2_MODEL_ID = listOf("A065", "AIN065")
     const val PHONE2A_MODEL_ID = "A142"
 
-    const val EE_ANIMATIONS_NUM = 3
+    const val EE_ANIMATIONS_NUM = 4
     val DIMMING_VALUES = listOf(1000, 2500, 4000, -1)
 }

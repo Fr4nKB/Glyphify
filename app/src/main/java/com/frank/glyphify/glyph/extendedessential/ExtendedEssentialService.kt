@@ -22,6 +22,7 @@ import com.frank.glyphify.R
 import com.frank.glyphify.Util.exactAlarm
 import com.frank.glyphify.Util.fromStringToNum
 import com.frank.glyphify.Util.loadPreferences
+import com.frank.glyphify.glyph.extendedessential.Animations.expansionAnimation
 import com.frank.glyphify.glyph.extendedessential.Animations.pingPongAnimation
 import com.frank.glyphify.glyph.extendedessential.Animations.pulseAnimation
 import com.nothing.ketchum.Common
@@ -59,6 +60,11 @@ class ExtendedEssentialService: NotificationListenerService() {
                 if (Common.is20111()) mGM?.register(Common.DEVICE_20111)
                 if (Common.is22111()) mGM?.register(Common.DEVICE_22111)
                 if (Common.is23111()) mGM?.register(Common.DEVICE_23111)
+
+                // turn off glyphs in case some of them were stuck
+                mGM?.openSession()
+                mGM?.turnOff()
+                mGM?.closeSession()
             }
 
             override fun onServiceDisconnected(componentName: ComponentName) {
@@ -218,6 +224,14 @@ class ExtendedEssentialService: NotificationListenerService() {
                                 }
                                 1 -> {
                                     dynamicFrame = pingPongAnimation(
+                                        dynamicFrame,
+                                        glyphs,
+                                        currTime,
+                                        intensity,
+                                        perStepDelay)
+                                }
+                                2 -> {
+                                    dynamicFrame = expansionAnimation(
                                         dynamicFrame,
                                         glyphs,
                                         currTime,

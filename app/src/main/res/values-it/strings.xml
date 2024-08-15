@@ -35,7 +35,7 @@
     <string name="progress_text_2">Creando animazioni uniche</string>
     <string name="progress_text_3">Quasi fatto…</string>
 
-    <string name="error_duration_long">Per favore seleziona un file audio di massimo 30 secondi</string>
+    <string name="error_duration_long">Per favore seleziona un file audio di massimo 5 minuti</string>
     <string name="error_invalid_audio_file">Per favore selezione un file audio</string>
     <string name="error_no_file">Questo file non esiste</string>
     <string name="error_failed_load">Caricamento del file selezionato fallito</string>
@@ -77,5 +77,6 @@
         <item>STATICO</item>
         <item>RESPIRO</item>
         <item>!PING-PONG</item>
+        <item>!ONDA</item>
     </string-array>
 </resources>

@@ -63,7 +63,7 @@ object FileHandling {
         try {
             val mediaInformation = FFprobeKit.getMediaInformation(filePath).mediaInformation
             val duration = mediaInformation.duration.toDouble()
-            if(duration > 30) throw RuntimeException(context.getString(R.string.error_duration_long))
+            if(duration > 300) throw RuntimeException(context.getString(R.string.error_duration_long))
 
             val streams = mediaInformation.streams
             for (stream in streams) {

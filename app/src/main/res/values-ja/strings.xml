@@ -1,60 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!--General-->
-  <string name="app_name">Glyphify</string>
-  <string name="title_home">Glyphifier</string>
-  <string name="title_ringtones">着信音</string>
-  <string name="title_notifications">通知</string>
-  <string name="alert_posbtn">OK</string>
-  <string name="alert_negbtn">中止する</string>
-  <string name="title_foreground_notification">Glyph の有用性を取り戻します</string>
-  <string name="title_new_version">Glyphify のアップデート</string>
-  <string name="msg_new_version">新しいバージョンが公開されています。タップして GitHub からダウンロードしてください。</string>
-  <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
-  <string name="support_paypal">コーヒーを買ってくれませんか</string>
-  <string name="support_github">リポジトリに Star を付ける</string>
-  <!--Home fragment-->
-  <string name="btn_file_selection">ファイルを選択</string>
-  <string name="btn_donate">寄付</string>
-  <string name="alert_msg_output_name">着信音の名前を入力してください</string>
-  <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可してください。</string>
-  <string name="toggle_expanded_title">ゾーンの数</string>
-  <string name="toggle_text_5zones">5 個のゾーン</string>
-  <string name="toggle_text_33zones">33 個のゾーン</string>
-  <string name="progress_text_1">曲を解析しています…</string>
-  <string name="progress_text_2">ユニークなアニメーションを作成中</string>
-  <string name="progress_text_3">あともう少しです…</string>
-  <string name="error_duration_long">最大 30 秒以内のオーディオファイルを選択してください</string>
-  <string name="error_invalid_audio_file">オーディオファイルを選択してください</string>
-  <string name="error_no_file">ファイルはありません</string>
-  <string name="error_failed_load">ファイルの読み込みに失敗しました</string>
-  <string name="error_failed_conv_wav">WAV ファイルへの変換に失敗しました</string>
-  <string name="error_failed_create_comp">着信音の作成に失敗しました</string>
-  <string name="error_failed_exporting_comp">音源を着信音としてエクスポートできませんでした</string>
-  <string name="error_no_output_name">着信音の名前が指定されていません</string>
-  <!--Ringtones fragment-->
-  <string name="btn_apply_ringtone">着信音を適用</string>
-  <string name="btn_share">共有</string>
-  <string name="btn_delete">削除</string>
-  <string name="toast_ringtone_applied">デフォルトの着信音を適用しました</string>
-  <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
-  <!--Notifications fragment-->
-  <string name="btn_add_app">アプリ</string>
-  <string name="btn_sleep_mode_start">開始の時間</string>
-  <string name="btn_sleep_mode_end">終了の時間</string>
-  <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可してください。</string>
-  <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
-  <string name="alert_msg_sleep_mode">拡張された Essential 通知を停止するスケジュールを指定します。</string>
-  <string name="title_sleep_mode">おやすみ時間モード</string>
-  <string name="toggle_dimming_title">GLYPH の強度</string>
-  <string name="toggle_text_dimming_low">低</string>
-  <string name="toggle_text_dimming_mid">中</string>
-  <string name="toggle_text_dimming_high">高</string>
-  <string name="toggle_text_dimming_var">バリアブル</string>
-  <string name="snackbar_long_tap_remove">要素を削除するには長押ししてください</string>
-  <string-array name="ee_animations_names">
-    <item type="normal">静的</item>
-    <item type="normal">パルス</item>
-    <item type="variable">PING-PONG</item>
-  </string-array>
+    <!--General-->
+    <string name="app_name">Glyphify</string>
+
+    <string name="title_home">Glyphifier</string>
+    <string name="title_ringtones">着信音</string>
+    <string name="title_notifications">通知</string>
+
+    <string name="alert_posbtn">OK</string>
+    <string name="alert_negbtn">中止する</string>
+
+    <string name="title_foreground_notification">Glyph の有用性を取り戻します</string>
+    <string name="title_new_version">Glyphify のアップデート</string>
+
+    <string name="msg_new_version">新しいバージョンが公開されています。タップして GitHub からダウンロードしてください。</string>
+
+    <string name="support_me">ようこそ！ このアプリは、学生によって開発された広告のない無料なアプリです。あなたがもしも私のアプリに価値を感じたり、感謝をしたいときは寄付をしていただくか、私の GitHub リポジトリに Star を付けてください。どんなサポートも感謝します！</string>
+    <string name="support_paypal">コーヒーを買ってくれませんか</string>
+    <string name="support_github">リポジトリに Star を付ける</string>
+
+
+    <!--Home fragment-->
+    <string name="btn_file_selection">ファイルを選択</string>
+    <string name="btn_donate">寄付</string>
+
+    <string name="alert_msg_output_name">着信音の名前を入力してください</string>
+    <string name="alert_msg_perm_notifications">アップデートが公開されたときの通知を許可してください。</string>
+
+    <string name="toggle_expanded_title">ゾーンの数</string>
+    <string name="toggle_text_5zones">5 個のゾーン</string>
+    <string name="toggle_text_33zones">33 個のゾーン</string>
+
+    <string name="progress_text_1">曲を解析しています…</string>
+    <string name="progress_text_2">ユニークなアニメーションを作成中</string>
+    <string name="progress_text_3">あともう少しです…</string>
+
+    <string name="error_duration_long">最長 5 分までのオーディオ ファイルを選択してください</string>
+    <string name="error_invalid_audio_file">オーディオファイルを選択してください</string>
+    <string name="error_no_file">ファイルはありません</string>
+    <string name="error_failed_load">ファイルの読み込みに失敗しました</string>
+    <string name="error_failed_conv_wav">WAV ファイルへの変換に失敗しました</string>
+    <string name="error_failed_create_comp">着信音の作成に失敗しました</string>
+    <string name="error_failed_exporting_comp">音源を着信音としてエクスポートできませんでした</string>
+    <string name="error_no_output_name">着信音の名前が指定されていません</string>
+
+
+    <!--Ringtones fragment-->
+    <string name="btn_apply_ringtone">着信音を適用</string>
+    <string name="btn_share">共有</string>
+    <string name="btn_delete">削除</string>
+
+    <string name="toast_ringtone_applied">デフォルトの着信音を適用しました</string>
+    <string name="alert_msg_perm_settings">このアプリで着信音を適用するためにシステム設定を変更する必要があります。これを許可しますか？</string>
+
+
+    <!--Notifications fragment-->
+    <string name="btn_add_app">アプリ</string>
+    <string name="btn_sleep_mode_start">Start time</string>
+    <string name="btn_sleep_mode_end">End time</string>
+
+    <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可してください。</string>
+    <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
+    <string name="alert_msg_sleep_mode">Schedule Extended Essential to turn off at a set time</string>
+
+    <string name="title_sleep_mode">おやすみ時間モード</string>
+
+    <string name="toggle_dimming_title">GLYPH の強度</string>
+    <string name="toggle_text_dimming_low">低</string>
+    <string name="toggle_text_dimming_mid">中</string>
+    <string name="toggle_text_dimming_high">高</string>
+    <string name="toggle_text_dimming_var">バリアブル</string>
+
+    <string name="snackbar_long_tap_remove">要素を削除するには長押ししてください</string>
+
+    <string-array name="ee_animations_names">
+        <item>静的</item>
+        <item>パルス</item>
+        <item>!PING-PONG</item>
+        <item>!WAVE</item>
+    </string-array>
 </resources>
