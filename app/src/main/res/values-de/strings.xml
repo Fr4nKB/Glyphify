@@ -35,14 +35,14 @@
     <string name="progress_text_2">Erstelle einzigartige Animationen</string>
     <string name="progress_text_3">Fast geschafft…</string>
 
-    <string name="error_duration_long">Please select an audio file of maximum 30 seconds</string>
-    <string name="error_invalid_audio_file">Please select an audio file</string>
-    <string name="error_no_file">No such file</string>
-    <string name="error_failed_load">Failed at loading the file</string>
-    <string name="error_failed_conv_wav">Conversion to a WAV file failed</string>
-    <string name="error_failed_create_comp">Creation of composition failed</string>
-    <string name="error_failed_exporting_comp">Failed at exporting the composition into a ringtone</string>
-    <string name="error_no_output_name">No name was provided for the ringtone</string>
+    <string name="error_duration_long">Bitte wähle eine Audiodatei mit maximal 30 Sekunden Länge</string>
+    <string name="error_invalid_audio_file">Bitte wähle eine Audiodatei</string>
+    <string name="error_no_file">Keine Datei</string>
+    <string name="error_failed_load">Fehler beim laden der Datei</string>
+    <string name="error_failed_conv_wav">Konvertierung zur WAV-Datei fehlgeschlagen</string>
+    <string name="error_failed_create_comp">Erstellung der Komposition fehlgeschlagen</string>
+    <string name="error_failed_exporting_comp">Fehler beim Export der Komposition zu einem Klingelton</string>
+    <string name="error_no_output_name">Es wurde kein Name für den Klingelton eingegeben</string>
 
 
     <!--Ringtones fragment-->
@@ -56,14 +56,14 @@
 
     <!--Notifications fragment-->
     <string name="btn_add_app">APP</string>
-    <string name="btn_sleep_mode_start">Start time</string>
-    <string name="btn_sleep_mode_end">End time</string>
+    <string name="btn_sleep_mode_start">Startzeit</string>
+    <string name="btn_sleep_mode_end">Endzeit</string>
 
     <string name="alert_msg_perm_contacts">Erlaube den Zugriff auf Kontakte, um eine Benachrichtigung von diesem Kontakt zu erkennen</string>
     <string name="alert_msg_perm_notifications_listener">In diesem Bereich kannst du jede Glyph Zone für eine "Essential" Benachrichtigung nutzen: Tippe auf eine Glyph Zone, wähle einen Kontakt und jedes Mal wenn du eine Benachrichtigung von diesem Kontakt erhältst, wird das Glyph aufleuchten bis du die Benachrichtigung weg wischst oder beantwortest. Um dies zu nutzen, musst du der App erlauben Benachrichtigungen und Deine Kontakte zu lesen.</string>
-    <string name="alert_msg_sleep_mode">Schedule Extended Essential to turn off at a set time</string>
+    <string name="alert_msg_sleep_mode">Erstelle einen Zeitplan, um die Extended Essential Benachrichtigungen zu einer bestimmten Zeit auszuschalten</string>
 
-    <string name="title_sleep_mode">SLEEP MODE</string>
+    <string name="title_sleep_mode">SCHLAFZEIT MODUS</string>
 
     <string name="toggle_dimming_title">GLYPH INTENSITÄT</string>
     <string name="toggle_text_dimming_low">NIEDRIG</string>
