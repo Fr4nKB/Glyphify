@@ -40,6 +40,9 @@ A huge thanks to everyone which believes in this project and shows it by donatin
 - **Vadim D. - 5€**
 - **Simona D.C. - 2.95€**
 - **Boris B. - 2.95€**
+- **Nathan B. - 2.95€**
+- **Marcin K. - 2.5€**
+- **Christian G. - 2.5€**
 - **Bridget W. - 1.4€**
 
 
