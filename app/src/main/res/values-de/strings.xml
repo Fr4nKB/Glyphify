@@ -35,7 +35,7 @@
     <string name="progress_text_2">Erstelle einzigartige Animationen</string>
     <string name="progress_text_3">Fast geschafft…</string>
 
-    <string name="error_duration_long">Bitte wähle eine Audiodazei mit maximal 30 Sekunden Länge</string>
+    <string name="error_duration_long">Bitte wähle eine Audiodatei mit maximal 30 Sekunden Länge</string>
     <string name="error_invalid_audio_file">Bitte wähle eine Audiodatei</string>
     <string name="error_no_file">Keine Datei</string>
     <string name="error_failed_load">Fehler beim laden der Datei</string>
