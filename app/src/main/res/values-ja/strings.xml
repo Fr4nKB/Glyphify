@@ -35,7 +35,7 @@
     <string name="progress_text_2">ユニークなアニメーションを作成中</string>
     <string name="progress_text_3">あともう少しです…</string>
 
-    <string name="error_duration_long">最長 5 分までのオーディオ ファイルを選択してください</string>
+    <string name="error_duration_long">最長 5 分までのオーディオファイルを選択してください</string>
     <string name="error_invalid_audio_file">オーディオファイルを選択してください</string>
     <string name="error_no_file">ファイルはありません</string>
     <string name="error_failed_load">ファイルの読み込みに失敗しました</string>
