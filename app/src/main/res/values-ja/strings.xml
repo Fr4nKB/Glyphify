@@ -56,8 +56,8 @@
 
     <!--Notifications fragment-->
     <string name="btn_add_app">アプリ</string>
-    <string name="btn_sleep_mode_start">Start time</string>
-    <string name="btn_sleep_mode_end">End time</string>
+    <string name="btn_sleep_mode_start">開始する時間</string>
+    <string name="btn_sleep_mode_end">終了する時間</string>
 
     <string name="alert_msg_perm_contacts">連絡先からの通知を検出するために連絡先の読み取りを許可してください。</string>
     <string name="alert_msg_perm_notifications_listener">このパネルは、任意の Glyph ゾーンを｢Essential 通知｣として選択できます。Glyph ゾーンをタップし、連絡先を選択するとその連絡先からの通知を受け取るたびにスワイプか、通知に応答するまで Glyph が点灯します。これを行なうには、アプリへの通知と連絡先のアクセスを許可する必要があります。</string>
