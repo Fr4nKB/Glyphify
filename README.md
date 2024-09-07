@@ -31,6 +31,8 @@ The app has been tested on Nothing Phone(1), Phone(2) and Phone(2a).
 
 A huge thanks to everyone which believes in this project and shows it by donating:
 - **Mirko D. - 98.76€** (**check his _Nothing Community app_ on the play store** [here](https://play.google.com/store/apps/details?id=com.nothing.news))
+- **James Z. - 10.71€**
+- **Gregor F. - 10.71€**
 - **Vadim D. - 7.5€**
 - **Landon C. - 6.57€**
 - **Robert F. - 5.54€**
