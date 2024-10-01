@@ -1,4 +1,7 @@
-# Glyphify: multipurpose Glyph app
+<h1 align="center">
+  Glyphify v2: available now on <a href="https://play.google.com/store/apps/details?id=com.frank.glyphify">Play Store</a>
+</h1>
+
 [Deutsch](./README_DE.md) | [日本語](./README_JA.md)
 ## Introduction
 **Glyphify** is an **Android app made for Nothing Phones**, it **packs multiple features to make the Glyph interface more useful**:
